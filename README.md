@@ -11,6 +11,18 @@ installation state, and native-grammar approval boundary.
 - `packs/go` — Tree-sitter Go highlighting and gopls integration.
 - `packs/swift` — Tree-sitter Swift highlighting and SourceKit-LSP integration.
 
+Browse the published catalog with `red plugin catalog`, or install a pack by
+its stable ID:
+
+```shell
+red plugin install --catalog go-language
+red plugin install --catalog swift-language
+```
+
+Native grammar approval remains a separate, digest-bound user decision. Add
+`--trust-native-grammars` only when you intend to load the verified grammar
+bytes in Red's process.
+
 ## Development
 
 Build a pack's pinned grammar, then install that checkout with Red:
@@ -22,7 +34,8 @@ red plugin install --path packs/go --trust-native-grammars
 
 Use `scripts/validate_pack.py packs/go` to validate source metadata and
 `scripts/package_release.py` to assemble the deterministic, target-specific bundle
-consumed by Red's curated catalog.
+consumed by Red's curated catalog. See [CONTRIBUTING.md](CONTRIBUTING.md) for
+the pack contract and review checklist.
 
 ## Releases
 

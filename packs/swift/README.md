@@ -20,21 +20,29 @@ brew install tree-sitter
 
 ## Install
 
-Build the pinned Swift grammar and install this checkout as an external Red
-package:
+Install the current verified release from Red's language-pack catalog:
 
 ```shell
-cd ~/code/red-swift-language-pack
-sh build-grammar.sh
-red plugin install --path . --trust-native-grammars
+red plugin install --catalog swift-language
 ```
 
-While language-pack support is being developed on a separate Red worktree, use
-that binary explicitly:
+This installs the pack without approving its native Tree-sitter grammar. After
+reviewing the provenance below, approve the exact catalog-verified grammar
+bytes either during install or separately:
 
 ```shell
-~/code/red.fcoury-extensible-languages/target/debug/red \
-  plugin install --path ~/code/red-swift-language-pack --trust-native-grammars
+red plugin install --catalog swift-language --trust-native-grammars
+red language trust swift
+```
+
+For pack development, build the pinned Swift grammar and install this checkout
+as a custom local package:
+
+```shell
+git clone https://github.com/codersauce/red-language-packs.git
+cd red-language-packs
+sh packs/swift/build-grammar.sh
+red plugin install --path packs/swift --trust-native-grammars
 ```
 
 The trust flag approves this exact locally built parser. Rebuilding or changing
@@ -42,7 +50,7 @@ the parser requires approving the new digest. To install first and approve the
 parser separately:
 
 ```shell
-red plugin install --path .
+red plugin install --path packs/swift
 red language trust swift
 ```
 

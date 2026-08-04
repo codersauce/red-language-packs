@@ -1,0 +1,6 @@
+tier = "official"
+
+[[requirements]]
+command = "sourcekit-lsp"
+purpose = "Hover, completion, navigation, diagnostics, symbols, and inlay hints"
+optional = true

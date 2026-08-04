@@ -24,28 +24,36 @@ Make sure the installed gopls executable is available on your PATH.
 
 ## Install
 
-Build the pinned Go grammar and install this checkout as an external Red
-package:
+Install the current verified release from Red's language-pack catalog:
 
 ~~~shell
-cd ~/code/red-go-language-pack
-sh build-grammar.sh
-red plugin install --path . --trust-native-grammars
+red plugin install --catalog go-language
 ~~~
 
-While language-package support lives on a separate Red worktree, use that
-binary explicitly:
+This installs the pack without approving its native Tree-sitter grammar. After
+reviewing the provenance below, approve the exact catalog-verified grammar
+bytes either during install or separately:
 
 ~~~shell
-~/code/red.fcoury-extensible-languages/target/debug/red \
-  plugin install --path ~/code/red-go-language-pack --trust-native-grammars
+red plugin install --catalog go-language --trust-native-grammars
+red language trust go
+~~~
+
+For pack development, build the pinned Go grammar and install this checkout as
+a custom local package:
+
+~~~shell
+git clone https://github.com/codersauce/red-language-packs.git
+cd red-language-packs
+sh packs/go/build-grammar.sh
+red plugin install --path packs/go --trust-native-grammars
 ~~~
 
 The trust flag approves this exact locally built parser. Rebuilding or changing
 the parser requires approving the new digest. To approve it separately:
 
 ~~~shell
-red plugin install --path .
+red plugin install --path packs/go
 red language trust go
 ~~~
 

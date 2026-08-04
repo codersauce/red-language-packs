@@ -1,0 +1,6 @@
+tier = "official"
+
+[[requirements]]
+command = "gopls"
+purpose = "Hover, completion, navigation, diagnostics, symbols, formatting, and inlay hints"
+optional = true

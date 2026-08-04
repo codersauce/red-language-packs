@@ -6,6 +6,7 @@ name = "Go language support"
 version = "0.1.0"
 red_api = "^0.6.0"
 description = "Go syntax highlighting, module and workspace detection, and gopls"
+repository = "https://github.com/codersauce/red-language-packs"
 license = "MIT"
 
 [languages.go]
