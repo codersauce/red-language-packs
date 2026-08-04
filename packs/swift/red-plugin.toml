@@ -1,0 +1,25 @@
+schema_version = 1
+
+[plugin]
+id = "swift-language"
+name = "Swift language support"
+version = "0.1.0"
+red_api = "^0.6.0"
+description = "Swift syntax highlighting, SwiftPM project detection, and SourceKit-LSP"
+license = "MIT"
+
+[languages.swift]
+extensions = ["swift"]
+filenames = ["Package.swift"]
+aliases = ["swiftlang", "swift6"]
+comment = "// %s"
+indent_width = 4
+
+[languages.swift.grammar]
+path = "grammars/swift.so"
+symbol = "tree_sitter_swift"
+highlights = ["queries/highlights.scm"]
+
+[languages.swift.lsp]
+command = "sourcekit-lsp"
+root_markers = ["Package.swift", ".git"]
