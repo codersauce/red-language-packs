@@ -1,0 +1,24 @@
+schema_version = 1
+
+[plugin]
+id = "go-language"
+name = "Go language support"
+version = "0.1.0"
+red_api = "^0.6.0"
+description = "Go syntax highlighting, module and workspace detection, and gopls"
+license = "MIT"
+
+[languages.go]
+extensions = ["go"]
+aliases = ["golang"]
+comment = "// %s"
+indent_width = 4
+
+[languages.go.grammar]
+path = "grammars/go.so"
+symbol = "tree_sitter_go"
+highlights = ["queries/highlights.scm"]
+
+[languages.go.lsp]
+command = "gopls"
+root_markers = ["go.work", "go.mod", ".git"]
