@@ -9,6 +9,20 @@ permissions:
   contents: read
 
 jobs:
+  arborium:
+    name: Validate Arborium import policy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13"
+      - run: python -m unittest discover -s scripts/tests -p 'test_*.py'
+        env:
+          PYTHONPATH: scripts
+      - run: python scripts/arborium.py inventory --check
+      - run: python scripts/arborium.py sync --check
+
   validate:
     name: Validate ${{ matrix.pack }}
     runs-on: ubuntu-latest
@@ -24,12 +38,13 @@ jobs:
       - run: python scripts/validate_pack.py "packs/${{ matrix.pack }}"
 
   build-grammars:
-    name: Build ${{ matrix.pack }} grammar
-    runs-on: ubuntu-latest
+    name: Build ${{ matrix.pack }} grammar on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         pack: [go, swift]
+        os: [ubuntu-latest, macos-15, macos-15-intel, windows-latest]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
@@ -37,7 +52,7 @@ jobs:
           python-version: "3.13"
       - name: Install pinned Tree-sitter CLI
         run: cargo install tree-sitter-cli --version 0.25.10 --locked
-      - run: sh "packs/${{ matrix.pack }}/build-grammar.sh"
+      - run: python scripts/build_grammar.py "${{ matrix.pack }}"
       - run: python scripts/validate_pack.py "packs/${{ matrix.pack }}"
 
   go-example:

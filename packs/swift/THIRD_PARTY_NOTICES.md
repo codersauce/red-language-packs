@@ -4,7 +4,17 @@ Swift Tree-sitter grammar and adapted highlight queries:
 
 - Project: <https://github.com/alex-pinkus/tree-sitter-swift>
 - Revision: `8abb3e8b33256d89127a35e87480736f74755ff9`
+- Arborium query source: v2.18.1, commit
+  `c2121b480bd7a8ab537d1f2e10433614405b3a54`.
+- The grammar revision intentionally overrides Arborium's older Swift source
+  to retain the upstream fix for zero-byte allocation in its external scanner.
 - License: MIT
+
+Arborium grammar and query curation:
+
+- Project: <https://github.com/bearcove/arborium>
+- Revision: `c2121b480bd7a8ab537d1f2e10433614405b3a54`
+- License: MIT OR Apache-2.0
 
 ```text
 MIT License

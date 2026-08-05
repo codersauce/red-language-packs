@@ -12,6 +12,7 @@ from pathlib import Path, PurePosixPath
 
 IDENTIFIER = re.compile(r"^[a-z0-9_-]+$")
 VERSION = re.compile(r"^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$")
+CAPTURE = re.compile(r"@([a-z][a-z0-9_.-]*)")
 
 
 def fail(message: str) -> None:
@@ -90,7 +91,44 @@ def validate(pack: Path) -> dict:
     for required in ("README.md", "LICENSE", "THIRD_PARTY_NOTICES.md", "build-grammar.sh"):
         if not (pack / required).is_file():
             fail(f"{pack}: missing {required}")
+    validate_arborium_overlay(pack, manifest, catalog)
     return manifest
+
+
+def validate_arborium_overlay(pack: Path, manifest: dict, catalog: dict) -> None:
+    overlay_path = Path(__file__).resolve().parent.parent / "arborium" / "languages" / f"{pack.name}.toml"
+    if not overlay_path.is_file():
+        return
+    overlay = load_toml(overlay_path)
+    package = overlay["package"]
+    language = overlay["language"]
+    identifier = language["id"]
+    plugin = manifest["plugin"]
+    for field in ("id", "name", "version", "red_api", "description", "license"):
+        if plugin.get(field) != package.get(field):
+            fail(f"{pack}: generated plugin.{field} differs from its reviewed Arborium overlay")
+    definition = manifest["languages"].get(identifier)
+    if not isinstance(definition, dict):
+        fail(f"{pack}: reviewed Arborium language {identifier} is missing from the manifest")
+    for field in ("extensions", "filenames", "aliases", "comment", "indent_width"):
+        if field in language and definition.get(field) != language[field]:
+            fail(f"{pack}: language.{field} differs from its reviewed Arborium overlay")
+    if definition.get("lsp", {}).get("command") != overlay["lsp"]["command"]:
+        fail(f"{pack}: language server differs from its reviewed external LSP command")
+    if catalog.get("tier") != package["catalog_tier"]:
+        fail(f"{pack}: catalog tier differs from its reviewed Arborium overlay")
+
+    captures: set[str] = set()
+    for raw in definition.get("grammar", {}).get("highlights", []):
+        captures.update(CAPTURE.findall((pack / safe_relative(raw, "highlight query")).read_text()))
+    missing = set(language.get("minimum_capture_scopes", [])) - captures
+    if missing:
+        fail(f"{pack}: required highlight scopes are missing: {', '.join(sorted(missing))}")
+
+    if source := overlay.get("source"):
+        notices = (pack / "THIRD_PARTY_NOTICES.md").read_text()
+        if source["revision"] not in notices:
+            fail(f"{pack}: reviewed source override is missing from third-party notices")
 
 
 def main() -> int:

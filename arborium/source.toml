@@ -1,0 +1,20 @@
+schema_version = 1
+
+[upstream]
+repository = "https://github.com/bearcove/arborium"
+tag = "v2.18.1"
+revision = "c2121b480bd7a8ab537d1f2e10433614405b3a54"
+archive_sha256 = "bae0095a4930723519750e4d23d7a0730b397e26dee75efebfe8d65f703e42ae"
+tree_sitter_cli = "0.25.10"
+grammar_abi = 15
+
+[policy]
+maximum_quality_tier = 3
+allowed_licenses = [
+    "Apache-2.0",
+    "Apache-2.0 WITH LLVM-exception",
+    "ISC",
+    "MIT",
+    "MIT OR Apache-2.0",
+    "Unlicense",
+]

@@ -25,10 +25,30 @@ bytes in Red's process.
 
 ## Development
 
-Build a pack's pinned grammar, then install that checkout with Red:
+Arborium is a pinned, digest-verified build-time grammar and query source. It
+is never installed as one aggregate runtime package. Red-owned metadata under
+`arborium/languages/` controls each pack's identity, selectors, comments,
+language-server command, reviewed query overlays, and any justified upstream
+source override.
+
+Inspect the complete upstream inventory and regenerate the reviewed packs:
 
 ```shell
-sh packs/go/build-grammar.sh
+python3 scripts/arborium.py inventory
+python3 scripts/arborium.py sync
+```
+
+Only languages with an explicit Red metadata overlay are generated. The importer
+rejects unpinned upstream sources, licenses outside the allowlist, immature
+quality tiers, missing reviewed overlays, and regressions in required highlight
+captures. It also records optional injected-language dependencies and unsupported
+injection-query features without implicitly installing another grammar.
+
+Build a pack's pinned ABI-15 grammar with Tree-sitter CLI 0.25.10, then install
+that checkout with Red:
+
+```shell
+python3 scripts/build_grammar.py go
 red plugin install --path packs/go --trust-native-grammars
 ```
 
@@ -36,6 +56,10 @@ Use `scripts/validate_pack.py packs/go` to validate source metadata and
 `scripts/package_release.py` to assemble the deterministic, target-specific bundle
 consumed by Red's curated catalog. See [CONTRIBUTING.md](CONTRIBUTING.md) for
 the pack contract and review checklist.
+
+Go continues to discover `gopls` on `PATH`; Swift uses the `sourcekit-lsp`
+provided by the selected Swift toolchain. Language servers are not downloaded
+or bundled with grammar packages.
 
 ## Releases
 

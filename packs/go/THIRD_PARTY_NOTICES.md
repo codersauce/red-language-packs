@@ -3,9 +3,16 @@
 Go Tree-sitter grammar and adapted highlight queries:
 
 - Project: <https://github.com/tree-sitter/tree-sitter-go>
-- Release: v0.25.0
-- Revision: 1547678a9da59885853f5f5cc8a99cc203fa2e2c
+- Revision: 2346a3ab1bb3857b48b29d779a1ef9799a248cd7
+- Imported through Arborium v2.18.1, commit
+  `c2121b480bd7a8ab537d1f2e10433614405b3a54`.
 - License: MIT
+
+Arborium grammar and query curation:
+
+- Project: <https://github.com/bearcove/arborium>
+- Revision: `c2121b480bd7a8ab537d1f2e10433614405b3a54`
+- License: MIT OR Apache-2.0
 
 ~~~text
 The MIT License (MIT)

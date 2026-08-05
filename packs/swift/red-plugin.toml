@@ -3,7 +3,7 @@ schema_version = 1
 [plugin]
 id = "swift-language"
 name = "Swift language support"
-version = "0.1.0"
+version = "0.2.0"
 red_api = "^0.6.0"
 description = "Swift syntax highlighting, SwiftPM project detection, and SourceKit-LSP"
 repository = "https://github.com/codersauce/red-language-packs"
@@ -19,7 +19,11 @@ indent_width = 4
 [languages.swift.grammar]
 path = "grammars/swift.so"
 symbol = "tree_sitter_swift"
-highlights = ["queries/highlights.scm"]
+highlights = [
+    "queries/arborium-highlights.scm",
+    "queries/highlights.scm",
+]
+injections = "queries/injections.scm"
 
 [languages.swift.lsp]
 command = "sourcekit-lsp"
