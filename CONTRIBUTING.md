@@ -29,8 +29,9 @@ python3.13 scripts/build_grammar.py <pack>
 python3.13 scripts/validate_pack.py packs/<pack>
 ```
 
-Add the pack slug to the validation matrices and tag filters in `.github/workflows`
-as part of the same change.
+Validation matrices and release tags discover reviewed pack slugs directly from
+`arborium/languages/`; adding a reviewed metadata file automatically includes its
+independent grammar in every supported target build.
 
 ## Review checklist
 

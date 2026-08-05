@@ -1,0 +1,6 @@
+tier = "official"
+
+[[requirements]]
+command = "svelteserver"
+purpose = "Svelte completion, diagnostics, component navigation, and formatting"
+optional = true

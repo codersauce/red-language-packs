@@ -1,0 +1,6 @@
+tier = "official"
+
+[[requirements]]
+command = "intelephense"
+purpose = "PHP completion, navigation, diagnostics, formatting, and symbols"
+optional = true

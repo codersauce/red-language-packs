@@ -1,0 +1,6 @@
+tier = "official"
+
+[[requirements]]
+command = "csharp-ls"
+purpose = "Hover, completion, navigation, diagnostics, and symbols for .NET projects"
+optional = true

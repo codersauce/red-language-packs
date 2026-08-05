@@ -1,0 +1,6 @@
+tier = "official"
+
+[[requirements]]
+command = "kotlin-language-server"
+purpose = "Kotlin completion, diagnostics, navigation, and hover documentation"
+optional = true

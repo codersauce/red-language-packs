@@ -3,8 +3,7 @@ name: Release language pack
 on:
   push:
     tags:
-      - "go/v*"
-      - "swift/v*"
+      - "*/v*"
 
 permissions:
   contents: write
@@ -43,6 +42,7 @@ jobs:
           target="$(rustc -vV | sed -n 's/^host: //p')"
           test -n "$pack"
           test -n "$target"
+          test -f "arborium/languages/$pack.toml"
           test "$target" = "${{ matrix.target }}"
           echo "pack=$pack" >> "$GITHUB_OUTPUT"
           echo "target=$target" >> "$GITHUB_OUTPUT"

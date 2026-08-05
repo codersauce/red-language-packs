@@ -1,0 +1,44 @@
+[package]
+id = "cpp-language"
+name = "C++ language support"
+version = "0.1.0"
+red_api = "^0.6.0"
+description = "C++ syntax highlighting, inherited C queries, and clangd integration"
+license = "MIT"
+catalog_tier = "official"
+
+[language]
+id = "cpp"
+extensions = ["cc", "cpp", "cxx", "c++", "hh", "hpp", "hxx"]
+aliases = ["c++", "cplusplus"]
+comment = "// %s"
+indent_width = 4
+symbol = "tree_sitter_cpp"
+highlight_overlay = "queries/highlights.scm"
+minimum_capture_scopes = ["function", "keyword", "string", "type"]
+
+[provenance]
+copyright = ["Copyright (c) 2014 Max Brunsfeld"]
+
+[lsp]
+command = "clangd"
+root_markers = ["compile_commands.json", "compile_flags.txt", "CMakeLists.txt", ".git"]
+purpose = "Hover, completion, navigation, diagnostics, formatting, and inlay hints"
+
+[validation]
+sample = "example/main.cpp"
+source = '''#include <iostream>
+
+class Greeter {
+public:
+    void greet() const {
+        std::cout << "Hello from Red!";
+    }
+};
+
+int main() {
+    Greeter{}.greet();
+    return 0;
+}
+'''
+required_captures = ["function", "keyword", "string", "type"]

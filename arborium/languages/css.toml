@@ -1,0 +1,40 @@
+[package]
+id = "css-language"
+name = "CSS language support"
+version = "0.1.0"
+red_api = "^0.6.0"
+description = "CSS syntax highlighting, selector support, and CSS language server integration"
+license = "MIT"
+catalog_tier = "official"
+
+[language]
+id = "css"
+extensions = ["css"]
+aliases = ["stylesheet"]
+comment = "/* %s */"
+indent_width = 2
+symbol = "tree_sitter_css"
+highlight_overlay = "queries/highlights.scm"
+minimum_capture_scopes = ["property", "punctuation.bracket", "string.special", "tag"]
+
+[provenance]
+copyright = ["Copyright (c) 2018 Max Brunsfeld"]
+
+[lsp]
+command = "vscode-css-language-server"
+args = ["--stdio"]
+root_markers = ["package.json", ".git"]
+purpose = "CSS completion, diagnostics, hover documentation, and formatting"
+
+[validation]
+sample = "example/styles.css"
+source = '''body {
+  color: #ff0000;
+  display: grid;
+}
+
+.greeting {
+  font-size: 16px;
+}
+'''
+required_captures = ["property", "punctuation.bracket", "string.special", "tag"]

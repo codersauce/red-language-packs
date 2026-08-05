@@ -299,6 +299,23 @@ def load_overlay(path: Path) -> dict:
     identifier = overlay.get("language", {}).get("id")
     if path.stem != identifier:
         raise ValueError(f"overlay filename and language identifier disagree: {path}")
+    validation = overlay.get("validation", {})
+    if "source" in validation:
+        copyright_lines = overlay.get("provenance", {}).get("copyright", [])
+        if not copyright_lines or any(
+            not isinstance(line, str) or not line.startswith("Copyright ")
+            for line in copyright_lines
+        ):
+            raise ValueError(f"{identifier} generated pack requires reviewed upstream copyright notices")
+        if not isinstance(validation["source"], str) or not validation["source"].strip():
+            raise ValueError(f"{identifier} generated pack requires representative sample source")
+        provenance = overlay["provenance"]
+        if "query_repository" in provenance:
+            if not REVISION.fullmatch(provenance.get("query_revision", "")):
+                raise ValueError(f"{identifier} query provenance requires a pinned full Git commit")
+            if provenance.get("query_license") not in {"Apache-2.0", "MIT"}:
+                raise ValueError(f"{identifier} query provenance requires an approved explicit license")
+            archive_url(provenance["query_repository"], provenance["query_revision"])
     if source := overlay.get("source"):
         if not REVISION.fullmatch(source.get("revision", "")):
             raise ValueError(f"{identifier} source override requires a full Git commit")
@@ -365,6 +382,160 @@ def render_catalog(overlay: dict) -> str:
     )
 
 
+def render_readme(overlay: dict, definition: Definition) -> str:
+    package = overlay["package"]
+    language = overlay["language"]
+    identifier = language["id"]
+    lsp = overlay["lsp"]
+    injections, _, _ = injection_details(definition)
+    embedded = ""
+    if injections:
+        names = ", ".join(f"`{name}`" for name in injections)
+        embedded = (
+            "\n## Embedded languages\n\n"
+            f"This grammar can highlight {names} when those languages are available in Red. "
+            "Installing this pack never implicitly installs or approves another native grammar.\n"
+        )
+    return (
+        f"# {definition.name} for Red\n\n"
+        f"{package['description']}.\n\n"
+        "## Install\n\n"
+        "```shell\n"
+        f"red plugin install --catalog {package['id']}\n"
+        f"red language trust {identifier}\n"
+        "```\n\n"
+        "Native grammar approval is explicit and tied to the exact installed grammar digest. "
+        f"The optional `{lsp['command']}` language server is discovered on `PATH`; "
+        "syntax highlighting works without it.\n\n"
+        "For local development:\n\n"
+        "```shell\n"
+        f"python3 scripts/build_grammar.py {identifier}\n"
+        f"red plugin install --path packs/{identifier} --trust-native-grammars\n"
+        f"red packs/{identifier}/{overlay['validation']['sample']}\n"
+        "```\n"
+        f"{embedded}\n"
+        "## Grammar provenance\n\n"
+        f"- Upstream: <{definition.repository}>\n"
+        f"- Immutable grammar revision: `{definition.revision}`\n"
+        f"- Grammar license: `{definition.license}`\n"
+        "- Source: pinned Arborium grammar and highlighting queries\n\n"
+        "See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for complete attributions.\n"
+    )
+
+
+def render_license(copyright_lines: list[str]) -> str:
+    license_text = (ROOT / "LICENSE").read_text(encoding="utf-8")
+    marker = "\n\nPermission is hereby granted"
+    _, separator, permissions = license_text.partition(marker)
+    if not separator:
+        raise ValueError("repository MIT license does not contain the expected permission text")
+    attribution = "\n".join(copyright_lines)
+    return f"MIT License\n\n{attribution}{separator}{permissions}"
+
+
+def render_notices(
+    overlay: dict,
+    definition: Definition,
+    all_definitions: dict[str, Definition],
+    settings: dict,
+    source: Path,
+) -> str:
+    entries: list[tuple[Definition, dict]] = [(definition, overlay)]
+    seen = {definition.identifier}
+    pending = list(definition.query_dependencies)
+    while pending:
+        identifier = pending.pop(0)
+        if identifier in seen:
+            continue
+        dependency = all_definitions[identifier]
+        dependency_overlay = load_overlay(ROOT / "arborium" / "languages" / f"{identifier}.toml")
+        entries.append((dependency, dependency_overlay))
+        seen.add(identifier)
+        pending.extend(dependency.query_dependencies)
+
+    sections = ["# Third-party notices\n"]
+    for item, item_overlay in entries:
+        sections.append(
+            f"## {item.name} Tree-sitter grammar and highlighting queries\n\n"
+            f"- Project: <{item.repository}>\n"
+            f"- Revision: `{item.revision}`\n"
+            f"- License: `{item.license}`\n\n"
+            "```text\n"
+            f"{render_license(item_overlay['provenance']['copyright']).rstrip()}\n"
+            "```\n"
+        )
+        if repository := item_overlay["provenance"].get("query_repository"):
+            provenance = item_overlay["provenance"]
+            if provenance["query_license"] == "Apache-2.0":
+                apache = (source / "LICENSE-APACHE").read_text(encoding="utf-8")
+                terms, marker, _ = apache.partition("\nEND OF TERMS AND CONDITIONS")
+                if not marker:
+                    raise ValueError("Arborium Apache license does not contain its complete terms")
+                query_license = f"{terms}{marker}\n"
+            else:
+                query_license = render_license(provenance["copyright"])
+            sections.append(
+                f"## {item.name} highlighting query source\n\n"
+                f"- Project: <{repository}>\n"
+                f"- Revision: `{provenance['query_revision']}`\n"
+                f"- License: `{provenance['query_license']}`\n\n"
+                "```text\n"
+                f"{query_license.rstrip()}\n"
+                "```\n"
+            )
+    upstream = settings["upstream"]
+    arborium_license = (source / "LICENSE-MIT").read_text(encoding="utf-8")
+    sections.append(
+        "## Arborium grammar and query curation\n\n"
+        f"- Project: <{upstream['repository']}>\n"
+        f"- Revision: `{upstream['revision']}`\n"
+        "- License: `MIT OR Apache-2.0`; distributed here under MIT\n\n"
+        "```text\n"
+        f"{arborium_license.rstrip()}\n"
+        "```\n"
+    )
+    return "\n".join(sections)
+
+
+def generated_scaffold(
+    pack: Path,
+    overlay: dict,
+    definition: Definition,
+    all_definitions: dict[str, Definition],
+    settings: dict,
+    source: Path,
+    check: bool,
+) -> None:
+    identifier = definition.identifier
+    query_overlay = (
+        f"; Red-owned {definition.name} highlighting refinements.\n"
+        "; Arborium supplies the reviewed base query; add Red-specific overrides here.\n"
+    )
+    wrapper = (
+        "#!/usr/bin/env sh\n\n"
+        "set -eu\n\n"
+        'repository_directory=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)\n'
+        f'exec python3 "$repository_directory/scripts/build_grammar.py" {identifier} "$@"\n'
+    )
+    files = {
+        ".gitignore": f"/grammars/{identifier}.so\n",
+        "README.md": render_readme(overlay, definition),
+        "LICENSE": (ROOT / "LICENSE").read_text(encoding="utf-8"),
+        "THIRD_PARTY_NOTICES.md": render_notices(
+            overlay, definition, all_definitions, settings, source
+        ),
+        "build-grammar.sh": wrapper,
+        overlay["language"]["highlight_overlay"]: query_overlay,
+        overlay["validation"]["sample"]: overlay["validation"]["source"],
+    }
+    for relative, contents in files.items():
+        check_or_write(pack / relative, contents, check)
+
+
+def reviewed_languages() -> list[str]:
+    return sorted(path.stem for path in (ROOT / "arborium" / "languages").glob("*.toml"))
+
+
 def check_or_write(path: Path, contents: str, check: bool) -> None:
     if check:
         if not path.is_file() or path.read_text(encoding="utf-8") != contents:
@@ -393,6 +564,8 @@ def synchronize(source: Path, settings: dict, selected: list[str], check: bool) 
         if blockers := eligibility(definition, settings):
             raise ValueError(f"{identifier} cannot be published: {'; '.join(blockers)}")
         pack = ROOT / "packs" / identifier
+        if "source" in overlay["validation"]:
+            generated_scaffold(pack, overlay, definition, all_definitions, settings, source, check)
         if not pack.is_dir():
             raise ValueError(f"reviewed pack directory does not exist: {pack}")
         query = compose_highlights(definition, all_definitions)
@@ -426,9 +599,15 @@ def main() -> int:
     sync_parser = commands.add_parser("sync", help="generate reviewed independent language packs")
     sync_parser.add_argument("--check", action="store_true")
     sync_parser.add_argument("languages", nargs="*")
+    list_parser = commands.add_parser("list", help="list explicitly reviewed Red language packs")
+    list_parser.add_argument("--json", action="store_true", help="emit a JSON array")
     args = parser.parse_args()
     try:
         settings = load_settings()
+        if args.command == "list":
+            languages = reviewed_languages()
+            print(json.dumps(languages) if args.json else "\n".join(languages))
+            return 0
         with arborium_source(settings, args.archive) as source:
             if args.command == "inventory":
                 contents = json.dumps(inventory(source, settings), indent=2, sort_keys=True) + "\n"

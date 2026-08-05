@@ -1,0 +1,30 @@
+schema_version = 1
+
+[plugin]
+id = "dockerfile-language"
+name = "Dockerfile language support"
+version = "0.1.0"
+red_api = "^0.6.0"
+description = "Dockerfile and Containerfile syntax highlighting and Docker language server integration"
+repository = "https://github.com/codersauce/red-language-packs"
+license = "MIT"
+
+[languages.dockerfile]
+extensions = ["dockerfile"]
+filenames = ["Dockerfile", "Containerfile"]
+aliases = ["docker", "containerfile"]
+comment = "# %s"
+indent_width = 2
+
+[languages.dockerfile.grammar]
+path = "grammars/dockerfile.so"
+symbol = "tree_sitter_dockerfile"
+highlights = [
+    "queries/arborium-highlights.scm",
+    "queries/highlights.scm",
+]
+
+[languages.dockerfile.lsp]
+command = "docker-langserver"
+args = ["--stdio"]
+root_markers = ["Dockerfile", "Containerfile", "compose.yaml", "docker-compose.yml", ".git"]

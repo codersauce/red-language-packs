@@ -8,7 +8,7 @@ import shutil
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import call, patch
 
 import arborium
 import build_grammar
@@ -140,6 +140,129 @@ class ArboriumImportTests(unittest.TestCase):
 
         self.assertEqual(go["lsp"]["command"], "gopls")
         self.assertEqual(swift["lsp"]["command"], "sourcekit-lsp")
+
+    def test_reviewed_language_inventory_includes_each_independent_requested_pack(self) -> None:
+        self.assertEqual(
+            arborium.reviewed_languages(),
+            [
+                "c",
+                "c-sharp",
+                "cpp",
+                "css",
+                "dockerfile",
+                "go",
+                "html",
+                "java",
+                "kotlin",
+                "php",
+                "sql",
+                "svelte",
+                "swift",
+                "vue",
+            ],
+        )
+
+    def test_every_reviewed_language_keeps_a_distinct_package_and_external_server(self) -> None:
+        package_ids = set()
+        for identifier in arborium.reviewed_languages():
+            overlay = arborium.load_overlay(
+                arborium.ROOT / "arborium" / "languages" / f"{identifier}.toml"
+            )
+            package_id = overlay["package"]["id"]
+            self.assertNotIn(package_id, package_ids)
+            package_ids.add(package_id)
+            self.assertTrue(overlay["lsp"]["command"])
+
+    def test_kotlin_query_preserves_pinned_apache_provenance(self) -> None:
+        kotlin = arborium.load_overlay(arborium.ROOT / "arborium" / "languages" / "kotlin.toml")
+
+        self.assertEqual(kotlin["package"]["license"], "MIT")
+        self.assertEqual(kotlin["provenance"]["query_license"], "Apache-2.0")
+        self.assertEqual(
+            kotlin["provenance"]["query_revision"], "f8ab59861eed4a1c168505e3433462ed800f2bae"
+        )
+
+    def test_kotlin_notices_separate_apache_query_and_arborium_attributions(self) -> None:
+        notices = (arborium.ROOT / "packs" / "kotlin" / "THIRD_PARTY_NOTICES.md").read_text()
+        query_attribution, arborium_attribution = notices.split(
+            "## Arborium grammar and query curation", maxsplit=1
+        )
+
+        self.assertIn("https://github.com/nvim-treesitter/nvim-treesitter", query_attribution)
+        self.assertIn("Apache-2.0", query_attribution)
+        self.assertNotIn("Amos Wenger", query_attribution)
+        self.assertIn("Amos Wenger", arborium_attribution)
+
+    def test_inherited_grammars_preserve_parent_source_attributions(self) -> None:
+        cases = [
+            ("cpp", "https://github.com/tree-sitter/tree-sitter-c"),
+            ("svelte", "https://github.com/tree-sitter/tree-sitter-html"),
+            ("vue", "https://github.com/tree-sitter/tree-sitter-html"),
+        ]
+        for identifier, inherited_repository in cases:
+            with self.subTest(language=identifier):
+                notices = (
+                    arborium.ROOT / "packs" / identifier / "THIRD_PARTY_NOTICES.md"
+                ).read_text()
+                self.assertIn(inherited_repository, notices)
+
+    def test_every_generated_pack_ignores_its_compiled_native_grammar(self) -> None:
+        for identifier in arborium.reviewed_languages():
+            overlay = arborium.load_overlay(
+                arborium.ROOT / "arborium" / "languages" / f"{identifier}.toml"
+            )
+            if "source" not in overlay["validation"]:
+                continue
+            ignored = (arborium.ROOT / "packs" / identifier / ".gitignore").read_text()
+            self.assertIn(f"/grammars/{identifier}.so", ignored)
+
+    def test_generated_pack_requires_reviewed_upstream_copyright(self) -> None:
+        overlay = self.root / "example.toml"
+        overlay.write_text(
+            '[language]\nid = "example"\n[validation]\nsource = "example"\n',
+            encoding="utf-8",
+        )
+
+        with self.assertRaisesRegex(ValueError, "reviewed upstream copyright"):
+            arborium.load_overlay(overlay)
+
+    def test_scanner_staging_preserves_header_and_nested_include_dependencies(self) -> None:
+        destination = self.root / "scanner"
+        (destination / "src").mkdir(parents=True)
+        (destination / "common").mkdir()
+        (destination / "scanner.c").write_text('#include "tag.h"\n#include "common/scanner.h"\n')
+        (destination / "tag.h").write_text("/* tag declarations */\n")
+        (destination / "common" / "scanner.h").write_text("/* scanner declarations */\n")
+        definition = self.definition("scanner")
+
+        scanner = build_grammar.stage_scanner(destination, definition)
+
+        self.assertEqual(scanner, destination / "src" / "scanner.c")
+        self.assertTrue((destination / "src" / "tag.h").is_file())
+        self.assertTrue((destination / "src" / "common" / "scanner.h").is_file())
+
+    def test_grammar_dependencies_are_staged_as_local_tree_sitter_packages(self) -> None:
+        html = self.definition("html")
+        vue = self.definition("vue", dependencies=("html",))
+        grammar = html.directory / "grammar"
+        grammar.mkdir()
+        (grammar / "grammar.js").write_text("module.exports = grammar({name: 'html'});\n")
+        destination = self.root / "vue-build"
+        destination.mkdir()
+
+        build_grammar.stage_dependencies(destination, vue, {"html": html, "vue": vue})
+
+        self.assertTrue((destination / "node_modules" / "tree-sitter-html" / "grammar.js").is_file())
+
+    def test_all_grammar_builds_follow_reviewed_metadata_without_hard_coded_pack_names(self) -> None:
+        with (
+            patch.object(build_grammar, "reviewed_languages", return_value=["html", "vue"]),
+            patch.object(build_grammar, "build") as build,
+            patch("sys.argv", ["build_grammar.py", "--all"]),
+        ):
+            self.assertEqual(build_grammar.main(), 0)
+
+        build.assert_has_calls([call("html", None), call("vue", None)])
 
     def test_pinned_inventory_keeps_review_gates_and_optional_injection_dependencies(self) -> None:
         inventory = json.loads((arborium.ROOT / "arborium" / "inventory.json").read_text())

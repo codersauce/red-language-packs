@@ -1,0 +1,29 @@
+schema_version = 1
+
+[plugin]
+id = "css-language"
+name = "CSS language support"
+version = "0.1.0"
+red_api = "^0.6.0"
+description = "CSS syntax highlighting, selector support, and CSS language server integration"
+repository = "https://github.com/codersauce/red-language-packs"
+license = "MIT"
+
+[languages.css]
+extensions = ["css"]
+aliases = ["stylesheet"]
+comment = "/* %s */"
+indent_width = 2
+
+[languages.css.grammar]
+path = "grammars/css.so"
+symbol = "tree_sitter_css"
+highlights = [
+    "queries/arborium-highlights.scm",
+    "queries/highlights.scm",
+]
+
+[languages.css.lsp]
+command = "vscode-css-language-server"
+args = ["--stdio"]
+root_markers = ["package.json", ".git"]

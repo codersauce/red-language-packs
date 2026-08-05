@@ -1,0 +1,43 @@
+[package]
+id = "php-language"
+name = "PHP language support"
+version = "0.1.0"
+red_api = "^0.6.0"
+description = "PHP syntax highlighting, Composer project detection, and Intelephense integration"
+license = "MIT"
+catalog_tier = "official"
+
+[language]
+id = "php"
+extensions = ["php", "phtml", "php3", "php4", "php5", "phps"]
+aliases = ["php8"]
+comment = "// %s"
+indent_width = 4
+symbol = "tree_sitter_php"
+highlight_overlay = "queries/highlights.scm"
+minimum_capture_scopes = ["function", "keyword", "string", "tag", "type.builtin"]
+
+[provenance]
+copyright = [
+    "Copyright (c) 2017 Josh Vera, GitHub",
+    "Copyright (c) 2019 Max Brunsfeld, Amaan Qureshi, Christian Frøystad, Caleb White",
+]
+
+[lsp]
+command = "intelephense"
+args = ["--stdio"]
+root_markers = ["composer.json", ".git"]
+purpose = "PHP completion, navigation, diagnostics, formatting, and symbols"
+
+[validation]
+sample = "example/index.php"
+source = '''<?php
+
+function greet(string $name): string
+{
+    return "Hello, {$name}!";
+}
+
+echo greet("Red");
+'''
+required_captures = ["function", "keyword", "string", "tag", "type.builtin"]

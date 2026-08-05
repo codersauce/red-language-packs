@@ -1,0 +1,6 @@
+tier = "official"
+
+[[requirements]]
+command = "clangd"
+purpose = "Hover, completion, navigation, diagnostics, formatting, and inlay hints"
+optional = true

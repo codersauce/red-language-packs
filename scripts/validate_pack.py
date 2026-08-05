@@ -133,14 +133,24 @@ def validate_arborium_overlay(pack: Path, manifest: dict, catalog: dict) -> None
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("pack", type=Path)
+    parser.add_argument("pack", type=Path, nargs="?")
+    parser.add_argument("--all", action="store_true", help="validate every reviewed language pack")
     args = parser.parse_args()
+    if bool(args.pack) == args.all:
+        parser.error("provide exactly one pack or --all")
+    root = Path(__file__).resolve().parent.parent
+    packs = (
+        [root / "packs" / path.stem for path in sorted((root / "arborium" / "languages").glob("*.toml"))]
+        if args.all
+        else [args.pack.resolve()]
+    )
     try:
-        manifest = validate(args.pack.resolve())
+        for pack in packs:
+            manifest = validate(pack)
+            print(f"validated {manifest['plugin']['id']} {manifest['plugin']['version']}")
     except ValueError as error:
         print(error, file=sys.stderr)
         return 1
-    print(f"validated {manifest['plugin']['id']} {manifest['plugin']['version']}")
     return 0
 
 

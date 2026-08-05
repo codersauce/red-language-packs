@@ -14,7 +14,16 @@ import sys
 import tempfile
 from pathlib import Path
 
-from arborium import ROOT, arborium_source, definitions, extracted_archive, load_overlay, load_settings
+from arborium import (
+    Definition,
+    ROOT,
+    arborium_source,
+    definitions,
+    extracted_archive,
+    load_overlay,
+    load_settings,
+    reviewed_languages,
+)
 
 
 UNSAFE_SWIFT_ALLOCATION = re.compile(r"calloc\s*\(\s*0\s*,\s*sizeof\s*\(")
@@ -31,12 +40,43 @@ def check_cli(expected: str) -> str:
     return executable
 
 
+def stage_dependencies(
+    destination: Path, definition: Definition, all_definitions: dict[str, Definition]
+) -> None:
+    for identifier in definition.query_dependencies:
+        dependency = all_definitions.get(identifier)
+        if dependency is None:
+            raise ValueError(f"{definition.identifier} inherits unknown grammar {identifier}")
+        package = destination / "node_modules" / f"tree-sitter-{identifier}"
+        if package.exists():
+            continue
+        shutil.copytree(dependency.directory / "grammar", package)
+        stage_dependencies(package, dependency, all_definitions)
+
+
+def stage_scanner(destination: Path, definition: Definition) -> Path:
+    scanner = destination / "src" / "scanner.c"
+    if not scanner.is_file() and (source_scanner := destination / "scanner.c").is_file():
+        shutil.copy2(source_scanner, scanner)
+    if definition.has_scanner and not scanner.is_file():
+        raise ValueError(f"{definition.identifier} declares an external scanner but none was generated")
+    if scanner.is_file():
+        for header in destination.glob("*.h"):
+            shutil.copy2(header, scanner.parent / header.name)
+        for directory in destination.iterdir():
+            if directory.is_dir() and directory.name not in {"src", "node_modules"}:
+                if any(directory.rglob("*.h")):
+                    shutil.copytree(directory, scanner.parent / directory.name, dirs_exist_ok=True)
+    return scanner
+
+
 def build(identifier: str, archive: Path | None) -> Path:
     settings = load_settings()
     executable = check_cli(settings["upstream"]["tree_sitter_cli"])
     overlay = load_overlay(ROOT / "arborium" / "languages" / f"{identifier}.toml")
     with arborium_source(settings, archive) as arborium:
-        definition = definitions(arborium).get(identifier)
+        all_definitions = definitions(arborium)
+        definition = all_definitions.get(identifier)
         if definition is None:
             raise ValueError(f"Arborium does not define language {identifier}")
         with tempfile.TemporaryDirectory(prefix=f"red-{identifier}-grammar-") as directory:
@@ -52,6 +92,7 @@ def build(identifier: str, archive: Path | None) -> Path:
                     shutil.copytree(source, destination)
             else:
                 shutil.copytree(definition.directory / "grammar", destination)
+            stage_dependencies(destination, definition, all_definitions)
 
             configuration = destination / "tree-sitter.json"
             if not configuration.is_file():
@@ -60,11 +101,14 @@ def build(identifier: str, archive: Path | None) -> Path:
                         {
                             "grammars": [
                                 {
-                                    "name": identifier,
+                                    "name": overlay["language"].get("grammar_name", identifier),
                                     "camelcase": definition.name,
                                     "scope": f"source.{identifier}",
                                     "path": ".",
-                                    "file-types": overlay["language"].get("extensions", []),
+                                    "file-types": [
+                                        *overlay["language"].get("extensions", []),
+                                        *overlay["language"].get("filenames", []),
+                                    ],
                                 }
                             ],
                             "metadata": {
@@ -85,11 +129,7 @@ def build(identifier: str, archive: Path | None) -> Path:
                 cwd=destination,
                 check=True,
             )
-            scanner = destination / "src" / "scanner.c"
-            if not scanner.is_file() and (source_scanner := destination / "scanner.c").is_file():
-                shutil.copy2(source_scanner, scanner)
-            if definition.has_scanner and not scanner.is_file():
-                raise ValueError(f"{identifier} declares an external scanner but none was generated")
+            scanner = stage_scanner(destination, definition)
             if identifier == "swift" and UNSAFE_SWIFT_ALLOCATION.search(scanner.read_text(encoding="utf-8")):
                 raise ValueError("Swift scanner contains the unsafe zero-byte calloc allocation")
 
@@ -161,11 +201,15 @@ def validate_sample_highlighting(
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("language")
+    parser.add_argument("language", nargs="?")
+    parser.add_argument("--all", action="store_true", help="build every reviewed independent grammar")
     parser.add_argument("--archive", type=Path)
     args = parser.parse_args()
+    if bool(args.language) == args.all:
+        parser.error("provide exactly one language or --all")
     try:
-        build(args.language, args.archive)
+        for identifier in reviewed_languages() if args.all else [args.language]:
+            build(identifier, args.archive)
         return 0
     except (OSError, ValueError, subprocess.CalledProcessError) as error:
         print(error, file=sys.stderr)

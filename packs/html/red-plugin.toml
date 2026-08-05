@@ -1,0 +1,30 @@
+schema_version = 1
+
+[plugin]
+id = "html-language"
+name = "HTML language support"
+version = "0.1.0"
+red_api = "^0.6.0"
+description = "HTML syntax highlighting, embedded CSS and JavaScript, and HTML language server integration"
+repository = "https://github.com/codersauce/red-language-packs"
+license = "MIT"
+
+[languages.html]
+extensions = ["html", "htm", "xhtml"]
+aliases = ["htm", "xhtml"]
+comment = "<!-- %s -->"
+indent_width = 2
+
+[languages.html.grammar]
+path = "grammars/html.so"
+symbol = "tree_sitter_html"
+highlights = [
+    "queries/arborium-highlights.scm",
+    "queries/highlights.scm",
+]
+injections = "queries/injections.scm"
+
+[languages.html.lsp]
+command = "vscode-html-language-server"
+args = ["--stdio"]
+root_markers = ["package.json", ".git"]
