@@ -1,0 +1,41 @@
+[package]
+id = "kotlin-language"
+name = "Kotlin language support"
+version = "0.1.0"
+red_api = "^0.6.0"
+description = "Kotlin syntax highlighting, Gradle project detection, and Kotlin language server integration"
+license = "MIT"
+catalog_tier = "official"
+
+[language]
+id = "kotlin"
+extensions = ["kt", "kts"]
+aliases = ["kotlin-script"]
+comment = "// %s"
+indent_width = 4
+symbol = "tree_sitter_kotlin"
+highlight_overlay = "queries/highlights.scm"
+minimum_capture_scopes = ["function", "keyword.function", "string", "type"]
+
+[provenance]
+copyright = ["Copyright (c) 2019 fwcd"]
+query_repository = "https://github.com/nvim-treesitter/nvim-treesitter"
+query_revision = "f8ab59861eed4a1c168505e3433462ed800f2bae"
+query_license = "Apache-2.0"
+
+[lsp]
+command = "kotlin-language-server"
+root_markers = ["settings.gradle.kts", "build.gradle.kts", "pom.xml", ".git"]
+purpose = "Kotlin completion, diagnostics, navigation, and hover documentation"
+
+[validation]
+sample = "example/Main.kt"
+source = '''fun greet(name: String): String {
+    return "Hello, $name!"
+}
+
+fun main() {
+    println(greet("Red"))
+}
+'''
+required_captures = ["function", "keyword.function", "string", "type"]

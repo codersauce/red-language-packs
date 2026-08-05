@@ -1,0 +1,37 @@
+[package]
+id = "dockerfile-language"
+name = "Dockerfile language support"
+version = "0.1.0"
+red_api = "^0.6.0"
+description = "Dockerfile and Containerfile syntax highlighting and Docker language server integration"
+license = "MIT"
+catalog_tier = "official"
+
+[language]
+id = "dockerfile"
+extensions = ["dockerfile"]
+filenames = ["Dockerfile", "Containerfile"]
+aliases = ["docker", "containerfile"]
+comment = "# %s"
+indent_width = 2
+symbol = "tree_sitter_dockerfile"
+highlight_overlay = "queries/highlights.scm"
+minimum_capture_scopes = ["comment", "keyword", "string"]
+
+[provenance]
+copyright = ["Copyright (c) 2021 Camden Cheek"]
+
+[lsp]
+command = "docker-langserver"
+args = ["--stdio"]
+root_markers = ["Dockerfile", "Containerfile", "compose.yaml", "docker-compose.yml", ".git"]
+purpose = "Dockerfile completion, diagnostics, hover documentation, and formatting"
+
+[validation]
+sample = "example/Dockerfile"
+source = '''# Example container image for Red.
+FROM alpine:3.20
+RUN echo "Hello from Red!"
+CMD ["echo", "Hello from Red!"]
+'''
+required_captures = ["comment", "keyword", "string"]

@@ -1,0 +1,49 @@
+[package]
+id = "go-language"
+name = "Go language support"
+version = "0.2.0"
+red_api = "^0.6.0"
+description = "Go syntax highlighting, module and workspace detection, and gopls"
+license = "MIT"
+catalog_tier = "official"
+
+[language]
+id = "go"
+extensions = ["go"]
+aliases = ["golang"]
+comment = "// %s"
+indent_width = 4
+symbol = "tree_sitter_go"
+highlight_overlay = "queries/highlights.scm"
+minimum_capture_scopes = [
+    "function.call",
+    "function.method.call",
+    "keyword.coroutine",
+    "keyword.function",
+    "keyword.import",
+    "namespace",
+    "punctuation.bracket",
+    "punctuation.delimiter",
+    "string.escape",
+    "type.builtin",
+    "variable.member",
+    "variable.parameter",
+]
+
+[lsp]
+command = "gopls"
+root_markers = ["go.work", "go.mod", ".git"]
+purpose = "Hover, completion, navigation, diagnostics, symbols, formatting, and inlay hints"
+
+[validation]
+sample = "example/main.go"
+required_captures = [
+    "function.call",
+    "function.method.call",
+    "keyword.function",
+    "keyword.import",
+    "namespace",
+    "type.builtin",
+    "variable.member",
+    "variable.parameter",
+]

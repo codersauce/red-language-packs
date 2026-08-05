@@ -1,0 +1,35 @@
+[package]
+id = "sql-language"
+name = "SQL language support"
+version = "0.1.0"
+red_api = "^0.6.0"
+description = "SQL syntax highlighting, query navigation, and SQL language server integration"
+license = "MIT"
+catalog_tier = "official"
+
+[language]
+id = "sql"
+extensions = ["sql", "psql"]
+aliases = ["postgresql", "mysql", "sqlite"]
+comment = "-- %s"
+indent_width = 2
+symbol = "tree_sitter_sql"
+highlight_overlay = "queries/highlights.scm"
+minimum_capture_scopes = ["boolean", "field", "keyword", "string", "type"]
+
+[provenance]
+copyright = ["Copyright (c) 2021 Derek Stride"]
+
+[lsp]
+command = "sqls"
+root_markers = [".sqlfluff", ".git"]
+purpose = "SQL completion, diagnostics, schema navigation, and formatting"
+
+[validation]
+sample = "example/query.sql"
+source = '''SELECT users.name
+FROM users
+WHERE users.active = true
+  AND users.name = 'Red';
+'''
+required_captures = ["boolean", "field", "keyword", "string", "type"]

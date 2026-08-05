@@ -1,0 +1,30 @@
+schema_version = 1
+
+[plugin]
+id = "php-language"
+name = "PHP language support"
+version = "0.1.0"
+red_api = "^0.6.0"
+description = "PHP syntax highlighting, Composer project detection, and Intelephense integration"
+repository = "https://github.com/codersauce/red-language-packs"
+license = "MIT"
+
+[languages.php]
+extensions = ["php", "phtml", "php3", "php4", "php5", "phps"]
+aliases = ["php8"]
+comment = "// %s"
+indent_width = 4
+
+[languages.php.grammar]
+path = "grammars/php.so"
+symbol = "tree_sitter_php"
+highlights = [
+    "queries/arborium-highlights.scm",
+    "queries/highlights.scm",
+]
+injections = "queries/injections.scm"
+
+[languages.php.lsp]
+command = "intelephense"
+args = ["--stdio"]
+root_markers = ["composer.json", ".git"]

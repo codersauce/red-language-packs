@@ -12,10 +12,10 @@ completion, go-to-definition, diagnostics, symbols, and inlay hints.
 - Xcode or another Swift toolchain that provides `sourcekit-lsp`
 - Git, a C compiler, and the [Tree-sitter CLI](https://github.com/tree-sitter/tree-sitter)
 
-On macOS, install the Tree-sitter CLI with:
+Install the pinned Tree-sitter CLI with:
 
 ```shell
-brew install tree-sitter
+cargo install tree-sitter-cli --version 0.25.10 --locked
 ```
 
 ## Install
@@ -85,7 +85,8 @@ Any existing `.swift` file works as well. SourceKit-LSP uses the closest
 ## Grammar provenance
 
 The build uses `alex-pinkus/tree-sitter-swift`, pinned to commit
-`8abb3e8b33256d89127a35e87480736f74755ff9`, matching the Swift grammar
-revision in Neovim's Tree-sitter registry. Highlight queries are adapted from
-that grammar's MIT-licensed queries; see
+`8abb3e8b33256d89127a35e87480736f74755ff9`. This reviewed source override
+retains the upstream Swift external-scanner allocation fix rather than adopting
+Arborium's older scanner. Highlight and optional injection queries come from
+Arborium v2.18.1, with Red-owned refinements layered on top; see
 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

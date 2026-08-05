@@ -1,0 +1,29 @@
+schema_version = 1
+
+[plugin]
+id = "cpp-language"
+name = "C++ language support"
+version = "0.1.0"
+red_api = "^0.6.0"
+description = "C++ syntax highlighting, inherited C queries, and clangd integration"
+repository = "https://github.com/codersauce/red-language-packs"
+license = "MIT"
+
+[languages.cpp]
+extensions = ["cc", "cpp", "cxx", "c++", "hh", "hpp", "hxx"]
+aliases = ["c++", "cplusplus"]
+comment = "// %s"
+indent_width = 4
+
+[languages.cpp.grammar]
+path = "grammars/cpp.so"
+symbol = "tree_sitter_cpp"
+highlights = [
+    "queries/arborium-highlights.scm",
+    "queries/highlights.scm",
+]
+injections = "queries/injections.scm"
+
+[languages.cpp.lsp]
+command = "clangd"
+root_markers = ["compile_commands.json", "compile_flags.txt", "CMakeLists.txt", ".git"]

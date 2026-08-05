@@ -1,0 +1,6 @@
+tier = "official"
+
+[[requirements]]
+command = "vue-language-server"
+purpose = "Vue completion, diagnostics, component navigation, and formatting"
+optional = true

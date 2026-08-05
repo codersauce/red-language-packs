@@ -13,20 +13,25 @@ A pack must contain:
 - `red-plugin.toml` with one or more language definitions and no Husk entrypoint,
   native companion, activation hook, or keymap;
 - `catalog.toml` with its review tier and external tool requirements;
-- `build-grammar.sh` with immutable upstream revisions;
+- a reviewed source-only metadata overlay in `arborium/languages/<pack>.toml`;
+- the shared `scripts/build_grammar.py` builder, with an optional POSIX wrapper;
 - `README.md`, `LICENSE`, and `THIRD_PARTY_NOTICES.md`;
 - grammar queries and a representative example project.
 
 Run the source checks and build before opening a pull request:
 
 ```shell
+python3 scripts/arborium.py inventory --check
+python3 scripts/arborium.py sync --check
+PYTHONPATH=scripts python3 -m unittest discover -s scripts/tests
 python3.13 scripts/validate_pack.py packs/<pack>
-sh packs/<pack>/build-grammar.sh
+python3.13 scripts/build_grammar.py <pack>
 python3.13 scripts/validate_pack.py packs/<pack>
 ```
 
-Add the pack slug to the validation matrices and tag filters in `.github/workflows`
-as part of the same change.
+Validation matrices and release tags discover reviewed pack slugs directly from
+`arborium/languages/`; adding a reviewed metadata file automatically includes its
+independent grammar in every supported target build.
 
 ## Review checklist
 
@@ -34,8 +39,17 @@ as part of the same change.
   pack.
 - Upstream grammar source and commit are explicit, immutable, and reflected in
   `THIRD_PARTY_NOTICES.md`.
+- Arborium's archive and every source override have an exact SHA-256 digest;
+  source overrides explain why the reviewed upstream source differs.
+- Arborium's numeric quality tier is not confused with Red's `official` or
+  `curated` package tier.
 - Highlight queries have compatible licensing and useful coverage.
-- Build scripts fetch only the pinned revision and fail on a mismatch.
+- Generated base queries preserve Red-owned overlays and required capture
+  scopes; inherited queries are not duplicated.
+- Builds use Tree-sitter CLI 0.25.10, generate ABI 15, verify the grammar's
+  exported symbol, and include any required external scanner.
+- Optional injected languages never silently install or approve another native
+  grammar.
 - Language-server commands, root markers, and optional requirements work on
   representative projects.
 - Generated grammar binaries and build outputs are not committed.

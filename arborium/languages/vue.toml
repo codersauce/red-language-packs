@@ -1,0 +1,43 @@
+[package]
+id = "vue-language"
+name = "Vue language support"
+version = "0.1.0"
+red_api = "^0.6.0"
+description = "Vue single-file component highlighting, embedded JavaScript and CSS, and Vue language server integration"
+license = "MIT"
+catalog_tier = "official"
+
+[language]
+id = "vue"
+extensions = ["vue"]
+aliases = ["vuejs"]
+comment = "<!-- %s -->"
+indent_width = 2
+symbol = "tree_sitter_vue"
+highlight_overlay = "queries/highlights.scm"
+minimum_capture_scopes = ["attribute", "punctuation.bracket", "string", "tag", "tag.attribute"]
+
+[provenance]
+copyright = ["Copyright (c) 2024 Amaan Qureshi <amaanq12@gmail.com>"]
+
+[lsp]
+command = "vue-language-server"
+args = ["--stdio"]
+root_markers = ["vite.config.ts", "vite.config.js", "package.json", ".git"]
+purpose = "Vue completion, diagnostics, component navigation, and formatting"
+
+[validation]
+sample = "example/App.vue"
+source = '''<script setup lang="ts">
+const greeting: string = "Hello from Red!"
+</script>
+
+<template>
+  <h1 v-if="greeting" class="greeting">{{ greeting }}</h1>
+</template>
+
+<style scoped>
+.greeting { color: red; }
+</style>
+'''
+required_captures = ["attribute", "punctuation.bracket", "string", "tag", "tag.attribute"]

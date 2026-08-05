@@ -1,0 +1,30 @@
+schema_version = 1
+
+[plugin]
+id = "vue-language"
+name = "Vue language support"
+version = "0.1.0"
+red_api = "^0.6.0"
+description = "Vue single-file component highlighting, embedded JavaScript and CSS, and Vue language server integration"
+repository = "https://github.com/codersauce/red-language-packs"
+license = "MIT"
+
+[languages.vue]
+extensions = ["vue"]
+aliases = ["vuejs"]
+comment = "<!-- %s -->"
+indent_width = 2
+
+[languages.vue.grammar]
+path = "grammars/vue.so"
+symbol = "tree_sitter_vue"
+highlights = [
+    "queries/arborium-highlights.scm",
+    "queries/highlights.scm",
+]
+injections = "queries/injections.scm"
+
+[languages.vue.lsp]
+command = "vue-language-server"
+args = ["--stdio"]
+root_markers = ["vite.config.ts", "vite.config.js", "package.json", ".git"]

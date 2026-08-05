@@ -1,0 +1,28 @@
+schema_version = 1
+
+[plugin]
+id = "sql-language"
+name = "SQL language support"
+version = "0.1.0"
+red_api = "^0.6.0"
+description = "SQL syntax highlighting, query navigation, and SQL language server integration"
+repository = "https://github.com/codersauce/red-language-packs"
+license = "MIT"
+
+[languages.sql]
+extensions = ["sql", "psql"]
+aliases = ["postgresql", "mysql", "sqlite"]
+comment = "-- %s"
+indent_width = 2
+
+[languages.sql.grammar]
+path = "grammars/sql.so"
+symbol = "tree_sitter_sql"
+highlights = [
+    "queries/arborium-highlights.scm",
+    "queries/highlights.scm",
+]
+
+[languages.sql.lsp]
+command = "sqls"
+root_markers = [".sqlfluff", ".git"]

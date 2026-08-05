@@ -1,0 +1,28 @@
+schema_version = 1
+
+[plugin]
+id = "kotlin-language"
+name = "Kotlin language support"
+version = "0.1.0"
+red_api = "^0.6.0"
+description = "Kotlin syntax highlighting, Gradle project detection, and Kotlin language server integration"
+repository = "https://github.com/codersauce/red-language-packs"
+license = "MIT"
+
+[languages.kotlin]
+extensions = ["kt", "kts"]
+aliases = ["kotlin-script"]
+comment = "// %s"
+indent_width = 4
+
+[languages.kotlin.grammar]
+path = "grammars/kotlin.so"
+symbol = "tree_sitter_kotlin"
+highlights = [
+    "queries/arborium-highlights.scm",
+    "queries/highlights.scm",
+]
+
+[languages.kotlin.lsp]
+command = "kotlin-language-server"
+root_markers = ["settings.gradle.kts", "build.gradle.kts", "pom.xml", ".git"]

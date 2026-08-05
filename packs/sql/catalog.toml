@@ -1,0 +1,6 @@
+tier = "official"
+
+[[requirements]]
+command = "sqls"
+purpose = "SQL completion, diagnostics, schema navigation, and formatting"
+optional = true

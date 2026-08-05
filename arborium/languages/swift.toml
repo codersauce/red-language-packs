@@ -1,0 +1,50 @@
+[package]
+id = "swift-language"
+name = "Swift language support"
+version = "0.2.0"
+red_api = "^0.6.0"
+description = "Swift syntax highlighting, SwiftPM project detection, and SourceKit-LSP"
+license = "MIT"
+catalog_tier = "official"
+
+[language]
+id = "swift"
+extensions = ["swift"]
+filenames = ["Package.swift"]
+aliases = ["swiftlang", "swift6"]
+comment = "// %s"
+indent_width = 4
+symbol = "tree_sitter_swift"
+highlight_overlay = "queries/highlights.scm"
+minimum_capture_scopes = [
+    "function.call",
+    "keyword.coroutine",
+    "keyword.function",
+    "keyword.import",
+    "string.escape",
+    "variable.member",
+    "variable.parameter",
+]
+
+[source]
+repository = "https://github.com/alex-pinkus/tree-sitter-swift"
+revision = "8abb3e8b33256d89127a35e87480736f74755ff9"
+archive_sha256 = "db64fc4c12a16b4320c4ad3fb3eb50ee95f7001edc117ecb0ce7c88cb358bbee"
+reason = "Keep the upstream fix for the Swift external scanner's zero-byte calloc."
+
+[lsp]
+command = "sourcekit-lsp"
+root_markers = ["Package.swift", ".git"]
+purpose = "Hover, completion, navigation, diagnostics, symbols, and inlay hints"
+
+[validation]
+sample = "example/Sources/RedSwiftExample/main.swift"
+required_captures = [
+    "function.call",
+    "function.method",
+    "keyword.coroutine",
+    "keyword.function",
+    "keyword.import",
+    "variable.member",
+    "variable.parameter",
+]

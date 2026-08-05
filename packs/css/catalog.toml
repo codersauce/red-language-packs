@@ -1,0 +1,6 @@
+tier = "official"
+
+[[requirements]]
+command = "vscode-css-language-server"
+purpose = "CSS completion, diagnostics, hover documentation, and formatting"
+optional = true

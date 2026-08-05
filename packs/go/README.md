@@ -16,7 +16,7 @@ completion, go-to-definition, diagnostics, symbols, formatting, and inlay hints.
 On macOS:
 
 ~~~shell
-brew install tree-sitter
+cargo install tree-sitter-cli --version 0.25.10 --locked
 go install golang.org/x/tools/gopls@latest
 ~~~
 
@@ -96,8 +96,9 @@ go.mod, or Git repository as its workspace root.
 
 ## Grammar provenance
 
-The build uses [tree-sitter/tree-sitter-go](https://github.com/tree-sitter/tree-sitter-go)
-release v0.25.0, pinned to commit
-1547678a9da59885853f5f5cc8a99cc203fa2e2c. Highlight queries are adapted from
-the upstream MIT-licensed queries; see
+The build imports [tree-sitter/tree-sitter-go](https://github.com/tree-sitter/tree-sitter-go)
+through Arborium v2.18.1, pinned to grammar commit
+`2346a3ab1bb3857b48b29d779a1ef9799a248cd7`. Red's reviewed query overlay
+preserves richer function, parameter, import, punctuation, and builtin
+highlighting on top of Arborium's MIT-licensed base query; see
 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

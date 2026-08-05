@@ -1,0 +1,6 @@
+tier = "official"
+
+[[requirements]]
+command = "jdtls"
+purpose = "Java completion, navigation, diagnostics, refactoring, and symbols"
+optional = true

@@ -1,0 +1,30 @@
+schema_version = 1
+
+[plugin]
+id = "svelte-language"
+name = "Svelte language support"
+version = "0.1.0"
+red_api = "^0.6.0"
+description = "Svelte syntax highlighting, embedded JavaScript and CSS, and Svelte language server integration"
+repository = "https://github.com/codersauce/red-language-packs"
+license = "MIT"
+
+[languages.svelte]
+extensions = ["svelte"]
+aliases = ["svelte5"]
+comment = "<!-- %s -->"
+indent_width = 2
+
+[languages.svelte.grammar]
+path = "grammars/svelte.so"
+symbol = "tree_sitter_svelte"
+highlights = [
+    "queries/arborium-highlights.scm",
+    "queries/highlights.scm",
+]
+injections = "queries/injections.scm"
+
+[languages.svelte.lsp]
+command = "svelteserver"
+args = ["--stdio"]
+root_markers = ["svelte.config.js", "svelte.config.ts", "package.json", ".git"]

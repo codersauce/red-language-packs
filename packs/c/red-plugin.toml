@@ -1,0 +1,28 @@
+schema_version = 1
+
+[plugin]
+id = "c-language"
+name = "C language support"
+version = "0.1.0"
+red_api = "^0.6.0"
+description = "C syntax highlighting, project detection, and clangd integration"
+repository = "https://github.com/codersauce/red-language-packs"
+license = "MIT"
+
+[languages.c]
+extensions = ["c", "h"]
+aliases = ["c11", "c17", "c23"]
+comment = "// %s"
+indent_width = 4
+
+[languages.c.grammar]
+path = "grammars/c.so"
+symbol = "tree_sitter_c"
+highlights = [
+    "queries/arborium-highlights.scm",
+    "queries/highlights.scm",
+]
+
+[languages.c.lsp]
+command = "clangd"
+root_markers = ["compile_commands.json", "compile_flags.txt", "CMakeLists.txt", ".git"]

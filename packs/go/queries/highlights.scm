@@ -1,5 +1,5 @@
-; Go highlighting adapted from tree-sitter-go v0.25.0 (MIT).
-; Grammar revision: 1547678a9da59885853f5f5cc8a99cc203fa2e2c.
+; Red-owned Go highlighting refinements layered over the pinned Arborium query.
+; Grammar revision: 2346a3ab1bb3857b48b29d779a1ef9799a248cd7 (MIT).
 
 [
   "."
