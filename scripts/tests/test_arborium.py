@@ -136,9 +136,14 @@ class ArboriumImportTests(unittest.TestCase):
 
     def test_overlay_keeps_each_language_server_external(self) -> None:
         go = arborium.load_overlay(arborium.ROOT / "arborium" / "languages" / "go.toml")
+        powershell = arborium.load_overlay(
+            arborium.ROOT / "arborium" / "languages" / "powershell.toml"
+        )
         swift = arborium.load_overlay(arborium.ROOT / "arborium" / "languages" / "swift.toml")
 
         self.assertEqual(go["lsp"]["command"], "gopls")
+        self.assertEqual(powershell["lsp"]["command"], "pwsh")
+        self.assertIn("Start-EditorServices -Stdio", powershell["lsp"]["args"][-1])
         self.assertEqual(swift["lsp"]["command"], "sourcekit-lsp")
 
     def test_reviewed_language_inventory_includes_each_independent_requested_pack(self) -> None:
@@ -155,6 +160,7 @@ class ArboriumImportTests(unittest.TestCase):
                 "java",
                 "kotlin",
                 "php",
+                "powershell",
                 "sql",
                 "svelte",
                 "swift",

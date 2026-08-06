@@ -1,0 +1,6 @@
+tier = "official"
+
+[[requirements]]
+command = "pwsh"
+purpose = "PowerShell completion, navigation, diagnostics, symbols, and formatting via PowerShell Editor Services"
+optional = true
