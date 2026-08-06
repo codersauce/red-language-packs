@@ -1,0 +1,29 @@
+schema_version = 1
+
+[plugin]
+id = "powershell-language"
+name = "PowerShell language support"
+version = "0.1.0"
+red_api = "^0.6.0"
+description = "PowerShell syntax highlighting, module detection, and PowerShell Editor Services integration"
+repository = "https://github.com/codersauce/red-language-packs"
+license = "MIT"
+
+[languages.powershell]
+extensions = ["ps1", "psm1", "psd1"]
+aliases = ["ps1", "pwsh"]
+comment = "# %s"
+indent_width = 4
+
+[languages.powershell.grammar]
+path = "grammars/powershell.so"
+symbol = "tree_sitter_powershell"
+highlights = [
+    "queries/arborium-highlights.scm",
+    "queries/highlights.scm",
+]
+
+[languages.powershell.lsp]
+command = "pwsh"
+args = ["-NoLogo", "-NoProfile", "-Command", "Import-Module PowerShellEditorServices; Start-EditorServices -Stdio"]
+root_markers = ["PSScriptAnalyzerSettings.psd1", "psakefile.ps1", ".git"]

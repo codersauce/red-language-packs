@@ -18,6 +18,7 @@ installation state, and native-grammar approval boundary.
 - `packs/java` — Java highlighting and JDTLS integration.
 - `packs/kotlin` — Kotlin highlighting and Kotlin language server integration.
 - `packs/php` — PHP highlighting and Intelephense integration.
+- `packs/powershell` — PowerShell highlighting and PowerShell Editor Services integration.
 - `packs/sql` — SQL highlighting and SQL language server integration.
 - `packs/svelte` — Svelte highlighting with embedded scripts and styles.
 - `packs/swift` — Swift highlighting and SourceKit-LSP integration.
@@ -29,6 +30,7 @@ its stable ID:
 ```shell
 red plugin install --catalog go-language
 red plugin install --catalog html-language
+red plugin install --catalog powershell-language
 red plugin install --catalog swift-language
 ```
 
@@ -74,9 +76,11 @@ Use `scripts/validate_pack.py packs/go` to validate source metadata and
 consumed by Red's curated catalog. See [CONTRIBUTING.md](CONTRIBUTING.md) for
 the pack contract and review checklist.
 
-Every language server is optional and discovered on `PATH`: for example, Go
-uses `gopls`, Swift uses its toolchain-provided `sourcekit-lsp`, and C/C++ share
-`clangd`. Language servers are never downloaded or bundled with grammar packages.
+Every language server is optional and launched through a command discovered on
+`PATH`: for example, Go uses `gopls`, Swift uses its toolchain-provided
+`sourcekit-lsp`, C/C++ share `clangd`, and PowerShell Editor Services runs as a
+module through `pwsh`. Language servers are never downloaded or bundled with
+grammar packages.
 
 ## Releases
 

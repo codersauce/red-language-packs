@@ -387,6 +387,16 @@ def render_readme(overlay: dict, definition: Definition) -> str:
     language = overlay["language"]
     identifier = language["id"]
     lsp = overlay["lsp"]
+    lsp_name = lsp.get("name")
+    if lsp_name:
+        lsp_description = (
+            f"The optional [{lsp_name}]({lsp['documentation']}) language server is launched "
+            f"through `{lsp['command']}`. {lsp['setup']} Syntax "
+        )
+    else:
+        lsp_description = (
+            f"The optional `{lsp['command']}` language server is discovered on `PATH`; syntax "
+        )
     injections, _, _ = injection_details(definition)
     embedded = ""
     if injections:
@@ -405,8 +415,8 @@ def render_readme(overlay: dict, definition: Definition) -> str:
         f"red language trust {identifier}\n"
         "```\n\n"
         "Native grammar approval is explicit and tied to the exact installed grammar digest. "
-        f"The optional `{lsp['command']}` language server is discovered on `PATH`; "
-        "syntax highlighting works without it.\n\n"
+        f"{lsp_description}"
+        "highlighting works without it.\n\n"
         "For local development:\n\n"
         "```shell\n"
         f"python3 scripts/build_grammar.py {identifier}\n"

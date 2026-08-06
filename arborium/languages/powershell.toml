@@ -1,0 +1,52 @@
+[package]
+id = "powershell-language"
+name = "PowerShell language support"
+version = "0.1.0"
+red_api = "^0.6.0"
+description = "PowerShell syntax highlighting, module detection, and PowerShell Editor Services integration"
+license = "MIT"
+catalog_tier = "official"
+
+[language]
+id = "powershell"
+extensions = ["ps1", "psm1", "psd1"]
+aliases = ["ps1", "pwsh"]
+comment = "# %s"
+indent_width = 4
+symbol = "tree_sitter_powershell"
+highlight_overlay = "queries/highlights.scm"
+minimum_capture_scopes = ["comment", "function", "keyword", "string", "type", "variable"]
+
+[provenance]
+copyright = ["Copyright (c) 2023 Airbus CERT"]
+
+[lsp]
+command = "pwsh"
+args = [
+    "-NoLogo",
+    "-NoProfile",
+    "-Command",
+    "Import-Module PowerShellEditorServices; Start-EditorServices -Stdio",
+]
+root_markers = ["PSScriptAnalyzerSettings.psd1", "psakefile.ps1", ".git"]
+purpose = "PowerShell completion, navigation, diagnostics, symbols, and formatting via PowerShell Editor Services"
+name = "PowerShell Editor Services"
+documentation = "https://github.com/PowerShell/PowerShellEditorServices#usage"
+setup = "Install its released module on PowerShell's module path before opening a project."
+
+[validation]
+sample = "example/Get-Greeting.ps1"
+source = '''# A small module-style script for validating PowerShell support in Red.
+param(
+    [Parameter(Mandatory)]
+    [string]$Name = "Red"
+)
+
+function Get-Greeting {
+    param([string]$Recipient)
+    return "Hello, $Recipient!"
+}
+
+Write-Output (Get-Greeting -Recipient $Name)
+'''
+required_captures = ["comment", "function", "keyword", "string", "type", "variable"]
