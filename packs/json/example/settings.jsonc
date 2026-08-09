@@ -1,0 +1,9 @@
+{
+  // JSONC comments are supported alongside standard JSON values.
+  "editor": {
+    "fontFamily": "Red\u0020Mono",
+    "fontSize": 14,
+    "formatOnSave": true
+  },
+  "schema": null
+}

@@ -1,0 +1,6 @@
+tier = "official"
+
+[[requirements]]
+command = "vscode-json-language-server"
+purpose = "JSON completion, schema-aware validation, hover documentation, and formatting"
+optional = true

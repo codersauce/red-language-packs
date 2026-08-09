@@ -16,6 +16,7 @@ installation state, and native-grammar approval boundary.
 - `packs/go` — Go highlighting and gopls integration.
 - `packs/html` — HTML highlighting with embedded CSS and JavaScript.
 - `packs/java` — Java highlighting and JDTLS integration.
+- `packs/json` — JSON and JSONC highlighting and JSON language server integration.
 - `packs/kotlin` — Kotlin highlighting and Kotlin language server integration.
 - `packs/php` — PHP highlighting and Intelephense integration.
 - `packs/powershell` — PowerShell highlighting and PowerShell Editor Services integration.
