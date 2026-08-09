@@ -1,0 +1,29 @@
+schema_version = 1
+
+[plugin]
+id = "json-language"
+name = "JSON language support"
+version = "0.1.0"
+red_api = "^0.6.0"
+description = "JSON and JSONC syntax highlighting and JSON language server integration"
+repository = "https://github.com/codersauce/red-language-packs"
+license = "MIT"
+
+[languages.json]
+extensions = ["json", "jsonc"]
+aliases = ["jsonc"]
+comment = "// %s"
+indent_width = 2
+
+[languages.json.grammar]
+path = "grammars/json.so"
+symbol = "tree_sitter_json"
+highlights = [
+    "queries/arborium-highlights.scm",
+    "queries/highlights.scm",
+]
+
+[languages.json.lsp]
+command = "vscode-json-language-server"
+args = ["--stdio"]
+root_markers = ["package.json", ".git"]

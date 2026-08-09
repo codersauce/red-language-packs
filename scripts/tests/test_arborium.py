@@ -136,12 +136,16 @@ class ArboriumImportTests(unittest.TestCase):
 
     def test_overlay_keeps_each_language_server_external(self) -> None:
         go = arborium.load_overlay(arborium.ROOT / "arborium" / "languages" / "go.toml")
+        json_overlay = arborium.load_overlay(
+            arborium.ROOT / "arborium" / "languages" / "json.toml"
+        )
         powershell = arborium.load_overlay(
             arborium.ROOT / "arborium" / "languages" / "powershell.toml"
         )
         swift = arborium.load_overlay(arborium.ROOT / "arborium" / "languages" / "swift.toml")
 
         self.assertEqual(go["lsp"]["command"], "gopls")
+        self.assertEqual(json_overlay["lsp"]["command"], "vscode-json-language-server")
         self.assertEqual(powershell["lsp"]["command"], "pwsh")
         self.assertIn("Start-EditorServices -Stdio", powershell["lsp"]["args"][-1])
         self.assertEqual(swift["lsp"]["command"], "sourcekit-lsp")
@@ -158,6 +162,7 @@ class ArboriumImportTests(unittest.TestCase):
                 "go",
                 "html",
                 "java",
+                "json",
                 "kotlin",
                 "php",
                 "powershell",
