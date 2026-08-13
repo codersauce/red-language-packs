@@ -134,6 +134,16 @@ class ArboriumImportTests(unittest.TestCase):
 
         self.assertTrue(set(overlay["language"]["minimum_capture_scopes"]).issubset(captures))
 
+    def test_red_owned_highlight_scaffold_is_not_rewritten(self) -> None:
+        overlay = self.root / "queries" / "highlights.scm"
+        overlay.parent.mkdir(parents=True)
+        overlay.write_text("(identifier) @variable.parameter\n", encoding="utf-8")
+
+        arborium.scaffold_owned_file(overlay, "; generated scaffold\n", check=False)
+        arborium.scaffold_owned_file(overlay, "; generated scaffold\n", check=True)
+
+        self.assertEqual(overlay.read_text(), "(identifier) @variable.parameter\n")
+
     def test_overlay_keeps_each_language_server_external(self) -> None:
         go = arborium.load_overlay(arborium.ROOT / "arborium" / "languages" / "go.toml")
         json_overlay = arborium.load_overlay(
@@ -142,13 +152,26 @@ class ArboriumImportTests(unittest.TestCase):
         powershell = arborium.load_overlay(
             arborium.ROOT / "arborium" / "languages" / "powershell.toml"
         )
+        python = arborium.load_overlay(
+            arborium.ROOT / "arborium" / "languages" / "python.toml"
+        )
         swift = arborium.load_overlay(arborium.ROOT / "arborium" / "languages" / "swift.toml")
 
         self.assertEqual(go["lsp"]["command"], "gopls")
         self.assertEqual(json_overlay["lsp"]["command"], "vscode-json-language-server")
         self.assertEqual(powershell["lsp"]["command"], "pwsh")
         self.assertIn("Start-EditorServices -Stdio", powershell["lsp"]["args"][-1])
+        self.assertEqual(python["lsp"]["command"], "pyright-langserver")
         self.assertEqual(swift["lsp"]["command"], "sourcekit-lsp")
+
+    def test_python_pack_covers_source_gui_and_type_stub_files(self) -> None:
+        python = arborium.load_overlay(
+            arborium.ROOT / "arborium" / "languages" / "python.toml"
+        )
+
+        self.assertEqual(python["language"]["extensions"], ["py", "pyw", "pyi"])
+        self.assertIn("pyrightconfig.json", python["lsp"]["root_markers"])
+        self.assertIn("pyproject.toml", python["lsp"]["root_markers"])
 
     def test_reviewed_language_inventory_includes_each_independent_requested_pack(self) -> None:
         self.assertEqual(
@@ -166,6 +189,7 @@ class ArboriumImportTests(unittest.TestCase):
                 "kotlin",
                 "php",
                 "powershell",
+                "python",
                 "sql",
                 "svelte",
                 "swift",

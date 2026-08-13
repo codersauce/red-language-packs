@@ -1,0 +1,29 @@
+schema_version = 1
+
+[plugin]
+id = "python-language"
+name = "Python language support"
+version = "0.1.0"
+red_api = "^0.6.0"
+description = "Python syntax highlighting, type stub support, project detection, and Pyright integration"
+repository = "https://github.com/codersauce/red-language-packs"
+license = "MIT"
+
+[languages.python]
+extensions = ["py", "pyw", "pyi"]
+aliases = ["py", "py3", "python3"]
+comment = "# %s"
+indent_width = 4
+
+[languages.python.grammar]
+path = "grammars/python.so"
+symbol = "tree_sitter_python"
+highlights = [
+    "queries/arborium-highlights.scm",
+    "queries/highlights.scm",
+]
+
+[languages.python.lsp]
+command = "pyright-langserver"
+args = ["--stdio"]
+root_markers = ["pyrightconfig.json", "pyproject.toml", "setup.cfg", "setup.py", "requirements.txt", "Pipfile", "uv.lock", ".git"]

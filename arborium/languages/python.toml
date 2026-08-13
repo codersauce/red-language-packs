@@ -1,0 +1,116 @@
+[package]
+id = "python-language"
+name = "Python language support"
+version = "0.1.0"
+red_api = "^0.6.0"
+description = "Python syntax highlighting, type stub support, project detection, and Pyright integration"
+license = "MIT"
+catalog_tier = "official"
+
+[language]
+id = "python"
+extensions = ["py", "pyw", "pyi"]
+aliases = ["py", "py3", "python3"]
+comment = "# %s"
+indent_width = 4
+symbol = "tree_sitter_python"
+highlight_overlay = "queries/highlights.scm"
+minimum_capture_scopes = [
+    "comment",
+    "constant",
+    "constant.builtin",
+    "constructor",
+    "function",
+    "function.builtin",
+    "function.call",
+    "function.method.call",
+    "keyword",
+    "keyword.coroutine",
+    "keyword.function",
+    "keyword.import",
+    "number",
+    "operator",
+    "punctuation.bracket",
+    "punctuation.delimiter",
+    "string",
+    "string.escape",
+    "type",
+    "type.builtin",
+    "variable",
+    "variable.member",
+    "variable.parameter",
+]
+
+[provenance]
+copyright = ["Copyright (c) 2016 Max Brunsfeld"]
+
+[lsp]
+command = "pyright-langserver"
+args = ["--stdio"]
+root_markers = [
+    "pyrightconfig.json",
+    "pyproject.toml",
+    "setup.cfg",
+    "setup.py",
+    "requirements.txt",
+    "Pipfile",
+    "uv.lock",
+    ".git",
+]
+purpose = "Python and type-stub completion, hover, navigation, diagnostics, and symbols"
+name = "Pyright"
+documentation = "https://github.com/microsoft/pyright/blob/main/docs/installation.md"
+setup = "Install Pyright and ensure `pyright-langserver` is available on `PATH`."
+
+[validation]
+sample = "example/main.py"
+source = '''from __future__ import annotations
+
+import asyncio
+from dataclasses import dataclass
+
+# A typed constant used by the runtime and stub examples.
+DEFAULT_GREETING = "Hello"
+
+
+@dataclass(slots=True)
+class Greeter:
+    prefix: str = DEFAULT_GREETING
+
+    def greet(self, name: str = "Red") -> str:
+        """Return a friendly, typed greeting."""
+        message = f"{self.prefix}, {name}!\n"
+        print(message, end="")
+        return message
+
+
+async def main() -> None:
+    greeter = Greeter()
+    await asyncio.sleep(0)
+    greeter.greet()
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
+'''
+required_captures = [
+    "comment",
+    "constant",
+    "constant.builtin",
+    "constructor",
+    "function.builtin",
+    "function.call",
+    "function.method.call",
+    "keyword.coroutine",
+    "keyword.function",
+    "keyword.import",
+    "number",
+    "operator",
+    "punctuation.bracket",
+    "punctuation.delimiter",
+    "string",
+    "string.escape",
+    "type.builtin",
+    "variable.member",
+    "variable.parameter",
+]

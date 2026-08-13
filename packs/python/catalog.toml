@@ -1,0 +1,6 @@
+tier = "official"
+
+[[requirements]]
+command = "pyright-langserver"
+purpose = "Python and type-stub completion, hover, navigation, diagnostics, and symbols"
+optional = true

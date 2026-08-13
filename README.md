@@ -20,6 +20,7 @@ installation state, and native-grammar approval boundary.
 - `packs/kotlin` — Kotlin highlighting and Kotlin language server integration.
 - `packs/php` — PHP highlighting and Intelephense integration.
 - `packs/powershell` — PowerShell highlighting and PowerShell Editor Services integration.
+- `packs/python` — Python and type-stub highlighting with Pyright integration.
 - `packs/sql` — SQL highlighting and SQL language server integration.
 - `packs/svelte` — Svelte highlighting with embedded scripts and styles.
 - `packs/swift` — Swift highlighting and SourceKit-LSP integration.
@@ -32,6 +33,7 @@ its stable ID:
 red plugin install --catalog go-language
 red plugin install --catalog html-language
 red plugin install --catalog powershell-language
+red plugin install --catalog python-language
 red plugin install --catalog swift-language
 ```
 
