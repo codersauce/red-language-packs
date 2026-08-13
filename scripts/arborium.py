@@ -527,7 +527,7 @@ def generated_scaffold(
         'repository_directory=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)\n'
         f'exec python3 "$repository_directory/scripts/build_grammar.py" {identifier} "$@"\n'
     )
-    files = {
+    generated_files = {
         ".gitignore": f"/grammars/{identifier}.so\n",
         "README.md": render_readme(overlay, definition),
         "LICENSE": (ROOT / "LICENSE").read_text(encoding="utf-8"),
@@ -535,11 +535,11 @@ def generated_scaffold(
             overlay, definition, all_definitions, settings, source
         ),
         "build-grammar.sh": wrapper,
-        overlay["language"]["highlight_overlay"]: query_overlay,
         overlay["validation"]["sample"]: overlay["validation"]["source"],
     }
-    for relative, contents in files.items():
+    for relative, contents in generated_files.items():
         check_or_write(pack / relative, contents, check)
+    scaffold_owned_file(pack / overlay["language"]["highlight_overlay"], query_overlay, check)
 
 
 def reviewed_languages() -> list[str]:
@@ -551,6 +551,16 @@ def check_or_write(path: Path, contents: str, check: bool) -> None:
         if not path.is_file() or path.read_text(encoding="utf-8") != contents:
             raise ValueError(f"generated Arborium output is stale: {path.relative_to(ROOT)}")
         return
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(contents, encoding="utf-8")
+
+
+def scaffold_owned_file(path: Path, contents: str, check: bool) -> None:
+    """Create a maintainer-owned scaffold once without replacing reviewed edits."""
+    if path.is_file():
+        return
+    if check:
+        raise ValueError(f"reviewed Arborium output is missing: {path.relative_to(ROOT)}")
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(contents, encoding="utf-8")
 
