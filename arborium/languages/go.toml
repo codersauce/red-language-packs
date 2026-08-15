@@ -1,8 +1,8 @@
 [package]
 id = "go-language"
 name = "Go language support"
-version = "0.2.0"
-red_api = "^0.6.0"
+version = "0.3.0"
+red_api = "^0.10.0"
 description = "Go syntax highlighting, module and workspace detection, and gopls"
 license = "MIT"
 catalog_tier = "official"
@@ -34,6 +34,14 @@ minimum_capture_scopes = [
 command = "gopls"
 root_markers = ["go.work", "go.mod", ".git"]
 purpose = "Hover, completion, navigation, diagnostics, symbols, formatting, and inlay hints"
+
+[formatter]
+name = "gofmt"
+command = "gofmt"
+root_markers = ["go.work", "go.mod", ".git"]
+purpose = "Go source formatting"
+documentation = "https://pkg.go.dev/cmd/gofmt"
+setup = "Install Go and ensure `gofmt` is available on `PATH`."
 
 [validation]
 sample = "example/main.go"

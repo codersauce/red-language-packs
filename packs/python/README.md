@@ -11,6 +11,8 @@ red language trust python
 
 Native grammar approval is explicit and tied to the exact installed grammar digest. The optional [Pyright](https://github.com/microsoft/pyright/blob/main/docs/installation.md) language server is launched through `pyright-langserver`. Install Pyright and ensure `pyright-langserver` is available on `PATH`. Syntax highlighting works without it.
 
+The optional [Black](https://black.readthedocs.io/en/stable/usage_and_configuration/the_basics.html) formatter is launched through `black` and receives the document on standard input. Install Black and ensure `black` is available on `PATH`. Formatting is available through `Space f`; enable `formatting.on_save` to run it before writes.
+
 For local development:
 
 ```shell

@@ -4,3 +4,8 @@ tier = "official"
 command = "sqls"
 purpose = "SQL completion, diagnostics, schema navigation, and formatting"
 optional = true
+
+[[requirements]]
+command = "sqlfluff"
+purpose = "SQL formatting"
+optional = true

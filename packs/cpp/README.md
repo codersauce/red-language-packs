@@ -11,6 +11,8 @@ red language trust cpp
 
 Native grammar approval is explicit and tied to the exact installed grammar digest. The optional `clangd` language server is discovered on `PATH`; syntax highlighting works without it.
 
+The optional [clang-format](https://clang.llvm.org/docs/ClangFormat.html) formatter is launched through `clang-format` and receives the document on standard input. Install clang-format and ensure `clang-format` is available on `PATH`. Formatting is available through `Space f`; enable `formatting.on_save` to run it before writes.
+
 For local development:
 
 ```shell

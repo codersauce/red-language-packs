@@ -4,3 +4,8 @@ tier = "official"
 command = "csharp-ls"
 purpose = "Hover, completion, navigation, diagnostics, and symbols for .NET projects"
 optional = true
+
+[[requirements]]
+command = "dotnet"
+purpose = "C# source formatting with CSharpier"
+optional = true

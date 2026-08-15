@@ -1,8 +1,8 @@
 [package]
 id = "swift-language"
 name = "Swift language support"
-version = "0.2.0"
-red_api = "^0.6.0"
+version = "0.3.0"
+red_api = "^0.10.0"
 description = "Swift syntax highlighting, SwiftPM project detection, and SourceKit-LSP"
 license = "MIT"
 catalog_tier = "official"
@@ -36,6 +36,15 @@ reason = "Keep the upstream fix for the Swift external scanner's zero-byte callo
 command = "sourcekit-lsp"
 root_markers = ["Package.swift", ".git"]
 purpose = "Hover, completion, navigation, diagnostics, symbols, and inlay hints"
+
+[formatter]
+name = "swift-format"
+command = "swift"
+args = ["format", "--assume-filename", "{file}", "-"]
+root_markers = ["Package.swift", ".git"]
+purpose = "Swift source formatting"
+documentation = "https://github.com/swiftlang/swift-format"
+setup = "Install a Swift toolchain that provides `swift format`."
 
 [validation]
 sample = "example/Sources/RedSwiftExample/main.swift"

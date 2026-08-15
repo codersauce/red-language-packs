@@ -1,8 +1,8 @@
 [package]
 id = "python-language"
 name = "Python language support"
-version = "0.1.0"
-red_api = "^0.6.0"
+version = "0.2.0"
+red_api = "^0.10.0"
 description = "Python syntax highlighting, type stub support, project detection, and Pyright integration"
 license = "MIT"
 catalog_tier = "official"
@@ -61,6 +61,15 @@ purpose = "Python and type-stub completion, hover, navigation, diagnostics, and 
 name = "Pyright"
 documentation = "https://github.com/microsoft/pyright/blob/main/docs/installation.md"
 setup = "Install Pyright and ensure `pyright-langserver` is available on `PATH`."
+
+[formatter]
+name = "Black"
+command = "black"
+args = ["--quiet", "--stdin-filename", "{file}", "-"]
+root_markers = ["pyproject.toml", "setup.cfg", ".git"]
+purpose = "Python source and type-stub formatting"
+documentation = "https://black.readthedocs.io/en/stable/usage_and_configuration/the_basics.html"
+setup = "Install Black and ensure `black` is available on `PATH`."
 
 [validation]
 sample = "example/main.py"

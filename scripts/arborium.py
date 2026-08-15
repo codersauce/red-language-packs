@@ -323,6 +323,20 @@ def load_overlay(path: Path) -> dict:
             raise ValueError(f"{identifier} source override requires a SHA-256 archive digest")
         if not str(source.get("reason", "")).strip():
             raise ValueError(f"{identifier} source override requires a review reason")
+    formatter = overlay.get("formatter")
+    if not isinstance(formatter, dict):
+        raise ValueError(f"{identifier} requires reviewed external formatter metadata")
+    for field in ("name", "command", "purpose", "documentation", "setup"):
+        if not isinstance(formatter.get(field), str) or not formatter[field].strip():
+            raise ValueError(f"{identifier} formatter.{field} must be non-empty")
+    if not isinstance(formatter.get("args", []), list) or not all(
+        isinstance(argument, str) for argument in formatter.get("args", [])
+    ):
+        raise ValueError(f"{identifier} formatter.args must contain strings")
+    if not isinstance(formatter.get("root_markers", []), list) or not all(
+        isinstance(marker, str) and marker for marker in formatter.get("root_markers", [])
+    ):
+        raise ValueError(f"{identifier} formatter.root_markers must contain non-empty strings")
     return overlay
 
 
@@ -334,6 +348,7 @@ def render_manifest(overlay: dict, has_injections: bool) -> str:
     package = overlay["package"]
     language = overlay["language"]
     lsp = overlay["lsp"]
+    formatter = overlay["formatter"]
     identifier = language["id"]
     lines = ["schema_version = 1", "", "[plugin]"]
     for key in ("id", "name", "version", "red_api", "description"):
@@ -367,17 +382,26 @@ def render_manifest(overlay: dict, has_injections: bool) -> str:
     for key in ("command", "args", "root_markers"):
         if key in lsp:
             lines.append(f"{key} = {toml_value(lsp[key])}")
+    lines.extend(["", f"[languages.{identifier}.formatter]"])
+    for key in ("name", "command", "args", "root_markers"):
+        if key in formatter:
+            lines.append(f"{key} = {toml_value(formatter[key])}")
     return "\n".join(lines) + "\n"
 
 
 def render_catalog(overlay: dict) -> str:
     package = overlay["package"]
     lsp = overlay["lsp"]
+    formatter = overlay["formatter"]
     return (
         f"tier = {toml_value(package['catalog_tier'])}\n\n"
         "[[requirements]]\n"
         f"command = {toml_value(lsp['command'])}\n"
         f"purpose = {toml_value(lsp['purpose'])}\n"
+        "optional = true\n"
+        "\n[[requirements]]\n"
+        f"command = {toml_value(formatter['command'])}\n"
+        f"purpose = {toml_value(formatter['purpose'])}\n"
         "optional = true\n"
     )
 
@@ -387,6 +411,7 @@ def render_readme(overlay: dict, definition: Definition) -> str:
     language = overlay["language"]
     identifier = language["id"]
     lsp = overlay["lsp"]
+    formatter = overlay["formatter"]
     lsp_name = lsp.get("name")
     if lsp_name:
         lsp_description = (
@@ -417,6 +442,10 @@ def render_readme(overlay: dict, definition: Definition) -> str:
         "Native grammar approval is explicit and tied to the exact installed grammar digest. "
         f"{lsp_description}"
         "highlighting works without it.\n\n"
+        f"The optional [{formatter['name']}]({formatter['documentation']}) formatter is launched "
+        f"through `{formatter['command']}` and receives the document on standard input. "
+        f"{formatter['setup']} Formatting is available through `Space f`; enable "
+        "`formatting.on_save` to run it before writes.\n\n"
         "For local development:\n\n"
         "```shell\n"
         f"python3 scripts/build_grammar.py {identifier}\n"

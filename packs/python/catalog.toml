@@ -4,3 +4,8 @@ tier = "official"
 command = "pyright-langserver"
 purpose = "Python and type-stub completion, hover, navigation, diagnostics, and symbols"
 optional = true
+
+[[requirements]]
+command = "black"
+purpose = "Python source and type-stub formatting"
+optional = true

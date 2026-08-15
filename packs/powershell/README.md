@@ -11,6 +11,8 @@ red language trust powershell
 
 Native grammar approval is explicit and tied to the exact installed grammar digest. The optional [PowerShell Editor Services](https://github.com/PowerShell/PowerShellEditorServices#usage) language server is launched through `pwsh`. Install its released module on PowerShell's module path before opening a project. Syntax highlighting works without it.
 
+The optional [PSScriptAnalyzer](https://learn.microsoft.com/powershell/utility-modules/psscriptanalyzer/overview) formatter is launched through `pwsh` and receives the document on standard input. Install PSScriptAnalyzer for PowerShell so `Invoke-Formatter` is available to `pwsh`. Formatting is available through `Space f`; enable `formatting.on_save` to run it before writes.
+
 For local development:
 
 ```shell

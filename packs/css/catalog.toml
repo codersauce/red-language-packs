@@ -4,3 +4,8 @@ tier = "official"
 command = "vscode-css-language-server"
 purpose = "CSS completion, diagnostics, hover documentation, and formatting"
 optional = true
+
+[[requirements]]
+command = "prettier"
+purpose = "CSS formatting"
+optional = true

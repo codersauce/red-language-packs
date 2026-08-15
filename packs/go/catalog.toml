@@ -4,3 +4,8 @@ tier = "official"
 command = "gopls"
 purpose = "Hover, completion, navigation, diagnostics, symbols, formatting, and inlay hints"
 optional = true
+
+[[requirements]]
+command = "gofmt"
+purpose = "Go source formatting"
+optional = true

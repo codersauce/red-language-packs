@@ -3,8 +3,8 @@ schema_version = 1
 [plugin]
 id = "c-language"
 name = "C language support"
-version = "0.1.0"
-red_api = "^0.6.0"
+version = "0.2.0"
+red_api = "^0.10.0"
 description = "C syntax highlighting, project detection, and clangd integration"
 repository = "https://github.com/codersauce/red-language-packs"
 license = "MIT"
@@ -25,4 +25,10 @@ highlights = [
 
 [languages.c.lsp]
 command = "clangd"
+root_markers = ["compile_commands.json", "compile_flags.txt", "CMakeLists.txt", ".git"]
+
+[languages.c.formatter]
+name = "clang-format"
+command = "clang-format"
+args = ["--assume-filename", "{file}"]
 root_markers = ["compile_commands.json", "compile_flags.txt", "CMakeLists.txt", ".git"]

@@ -1,8 +1,8 @@
 [package]
 id = "dockerfile-language"
 name = "Dockerfile language support"
-version = "0.1.0"
-red_api = "^0.6.0"
+version = "0.2.0"
+red_api = "^0.10.0"
 description = "Dockerfile and Containerfile syntax highlighting and Docker language server integration"
 license = "MIT"
 catalog_tier = "official"
@@ -26,6 +26,14 @@ command = "docker-langserver"
 args = ["--stdio"]
 root_markers = ["Dockerfile", "Containerfile", "compose.yaml", "docker-compose.yml", ".git"]
 purpose = "Dockerfile completion, diagnostics, hover documentation, and formatting"
+
+[formatter]
+name = "dockerfmt"
+command = "dockerfmt"
+root_markers = ["Dockerfile", "Containerfile", "compose.yaml", "docker-compose.yml", ".git"]
+purpose = "Dockerfile formatting"
+documentation = "https://github.com/reteps/dockerfmt"
+setup = "Install dockerfmt and ensure `dockerfmt` is available on `PATH`."
 
 [validation]
 sample = "example/Dockerfile"

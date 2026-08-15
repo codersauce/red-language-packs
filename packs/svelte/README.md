@@ -11,6 +11,8 @@ red language trust svelte
 
 Native grammar approval is explicit and tied to the exact installed grammar digest. The optional `svelteserver` language server is discovered on `PATH`; syntax highlighting works without it.
 
+The optional [Prettier Svelte](https://github.com/sveltejs/prettier-plugin-svelte) formatter is launched through `prettier` and receives the document on standard input. Install Prettier and `prettier-plugin-svelte` in the project or globally. Formatting is available through `Space f`; enable `formatting.on_save` to run it before writes.
+
 For local development:
 
 ```shell

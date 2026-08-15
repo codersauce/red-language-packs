@@ -4,3 +4,8 @@ tier = "official"
 command = "vscode-html-language-server"
 purpose = "HTML completion, diagnostics, hover documentation, and formatting"
 optional = true
+
+[[requirements]]
+command = "prettier"
+purpose = "HTML formatting"
+optional = true

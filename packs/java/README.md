@@ -11,6 +11,8 @@ red language trust java
 
 Native grammar approval is explicit and tied to the exact installed grammar digest. The optional `jdtls` language server is discovered on `PATH`; syntax highlighting works without it.
 
+The optional [google-java-format](https://github.com/google/google-java-format) formatter is launched through `google-java-format` and receives the document on standard input. Install google-java-format and ensure `google-java-format` is available on `PATH`. Formatting is available through `Space f`; enable `formatting.on_save` to run it before writes.
+
 For local development:
 
 ```shell

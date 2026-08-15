@@ -10,8 +10,8 @@ completion, go-to-definition, diagnostics, symbols, formatting, and inlay hints.
 
 - Red with external language-package support.
 - Git, a C compiler, and the [Tree-sitter CLI](https://github.com/tree-sitter/tree-sitter).
-- A Go toolchain and gopls for language-server features; syntax highlighting
-  works without either.
+- A Go toolchain for `gofmt`, plus gopls for language-server features; syntax
+  highlighting works without either.
 
 On macOS:
 
@@ -21,6 +21,9 @@ go install golang.org/x/tools/gopls@latest
 ~~~
 
 Make sure the installed gopls executable is available on your PATH.
+
+Red launches `gofmt` with the document on standard input when you press
+`Space f`. Enable `formatting.on_save` to format immediately before writes.
 
 ## Install
 

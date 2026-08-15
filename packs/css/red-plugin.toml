@@ -3,8 +3,8 @@ schema_version = 1
 [plugin]
 id = "css-language"
 name = "CSS language support"
-version = "0.1.0"
-red_api = "^0.6.0"
+version = "0.2.0"
+red_api = "^0.10.0"
 description = "CSS syntax highlighting, selector support, and CSS language server integration"
 repository = "https://github.com/codersauce/red-language-packs"
 license = "MIT"
@@ -26,4 +26,10 @@ highlights = [
 [languages.css.lsp]
 command = "vscode-css-language-server"
 args = ["--stdio"]
+root_markers = ["package.json", ".git"]
+
+[languages.css.formatter]
+name = "Prettier"
+command = "prettier"
+args = ["--stdin-filepath", "{file}"]
 root_markers = ["package.json", ".git"]
