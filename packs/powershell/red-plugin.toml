@@ -3,8 +3,8 @@ schema_version = 1
 [plugin]
 id = "powershell-language"
 name = "PowerShell language support"
-version = "0.1.0"
-red_api = "^0.6.0"
+version = "0.2.0"
+red_api = "^0.10.0"
 description = "PowerShell syntax highlighting, module detection, and PowerShell Editor Services integration"
 repository = "https://github.com/codersauce/red-language-packs"
 license = "MIT"
@@ -26,4 +26,10 @@ highlights = [
 [languages.powershell.lsp]
 command = "pwsh"
 args = ["-NoLogo", "-NoProfile", "-Command", "Import-Module PowerShellEditorServices; Start-EditorServices -Stdio"]
+root_markers = ["PSScriptAnalyzerSettings.psd1", "psakefile.ps1", ".git"]
+
+[languages.powershell.formatter]
+name = "PSScriptAnalyzer"
+command = "pwsh"
+args = ["-NoLogo", "-NoProfile", "-Command", "Import-Module PSScriptAnalyzer; Invoke-Formatter -ScriptDefinition ([Console]::In.ReadToEnd())"]
 root_markers = ["PSScriptAnalyzerSettings.psd1", "psakefile.ps1", ".git"]

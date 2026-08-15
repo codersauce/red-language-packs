@@ -4,3 +4,8 @@ tier = "official"
 command = "kotlin-language-server"
 purpose = "Kotlin completion, diagnostics, navigation, and hover documentation"
 optional = true
+
+[[requirements]]
+command = "ktlint"
+purpose = "Kotlin source formatting"
+optional = true

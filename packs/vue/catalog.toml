@@ -4,3 +4,8 @@ tier = "official"
 command = "vue-language-server"
 purpose = "Vue completion, diagnostics, component navigation, and formatting"
 optional = true
+
+[[requirements]]
+command = "prettier"
+purpose = "Vue single-file component formatting"
+optional = true

@@ -11,6 +11,8 @@ red language trust sql
 
 Native grammar approval is explicit and tied to the exact installed grammar digest. The optional `sqls` language server is discovered on `PATH`; syntax highlighting works without it.
 
+The optional [SQLFluff](https://docs.sqlfluff.com/en/stable/reference/cli.html) formatter is launched through `sqlfluff` and receives the document on standard input. Install SQLFluff and ensure `sqlfluff` is available on `PATH`. Formatting is available through `Space f`; enable `formatting.on_save` to run it before writes.
+
 For local development:
 
 ```shell

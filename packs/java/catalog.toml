@@ -4,3 +4,8 @@ tier = "official"
 command = "jdtls"
 purpose = "Java completion, navigation, diagnostics, refactoring, and symbols"
 optional = true
+
+[[requirements]]
+command = "google-java-format"
+purpose = "Java source formatting"
+optional = true

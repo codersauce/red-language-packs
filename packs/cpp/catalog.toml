@@ -4,3 +4,8 @@ tier = "official"
 command = "clangd"
 purpose = "Hover, completion, navigation, diagnostics, formatting, and inlay hints"
 optional = true
+
+[[requirements]]
+command = "clang-format"
+purpose = "C++ source formatting"
+optional = true

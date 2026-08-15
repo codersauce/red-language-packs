@@ -3,8 +3,8 @@ schema_version = 1
 [plugin]
 id = "php-language"
 name = "PHP language support"
-version = "0.1.0"
-red_api = "^0.6.0"
+version = "0.2.0"
+red_api = "^0.10.0"
 description = "PHP syntax highlighting, Composer project detection, and Intelephense integration"
 repository = "https://github.com/codersauce/red-language-packs"
 license = "MIT"
@@ -28,3 +28,9 @@ injections = "queries/injections.scm"
 command = "intelephense"
 args = ["--stdio"]
 root_markers = ["composer.json", ".git"]
+
+[languages.php.formatter]
+name = "Prettier PHP"
+command = "prettier"
+args = ["--plugin=@prettier/plugin-php", "--stdin-filepath", "{file}"]
+root_markers = ["composer.json", "package.json", ".git"]

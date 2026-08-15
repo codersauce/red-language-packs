@@ -9,7 +9,7 @@ completion, go-to-definition, diagnostics, symbols, and inlay hints.
 ## Requirements
 
 - Red with external language-package support
-- Xcode or another Swift toolchain that provides `sourcekit-lsp`
+- Xcode or another Swift toolchain that provides `sourcekit-lsp` and `swift format`
 - Git, a C compiler, and the [Tree-sitter CLI](https://github.com/tree-sitter/tree-sitter)
 
 Install the pinned Tree-sitter CLI with:
@@ -17,6 +17,9 @@ Install the pinned Tree-sitter CLI with:
 ```shell
 cargo install tree-sitter-cli --version 0.25.10 --locked
 ```
+
+Red launches `swift format` with the document on standard input when you press
+`Space f`. Enable `formatting.on_save` to format immediately before writes.
 
 ## Install
 

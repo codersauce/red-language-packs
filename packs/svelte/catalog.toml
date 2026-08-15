@@ -4,3 +4,8 @@ tier = "official"
 command = "svelteserver"
 purpose = "Svelte completion, diagnostics, component navigation, and formatting"
 optional = true
+
+[[requirements]]
+command = "prettier"
+purpose = "Svelte component formatting"
+optional = true

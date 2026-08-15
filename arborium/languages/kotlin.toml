@@ -1,8 +1,8 @@
 [package]
 id = "kotlin-language"
 name = "Kotlin language support"
-version = "0.1.0"
-red_api = "^0.6.0"
+version = "0.2.0"
+red_api = "^0.10.0"
 description = "Kotlin syntax highlighting, Gradle project detection, and Kotlin language server integration"
 license = "MIT"
 catalog_tier = "official"
@@ -27,6 +27,15 @@ query_license = "Apache-2.0"
 command = "kotlin-language-server"
 root_markers = ["settings.gradle.kts", "build.gradle.kts", "pom.xml", ".git"]
 purpose = "Kotlin completion, diagnostics, navigation, and hover documentation"
+
+[formatter]
+name = "ktlint"
+command = "ktlint"
+args = ["--format", "--stdin", "--stdin-path", "{file}", "--log-level=none"]
+root_markers = ["settings.gradle.kts", "build.gradle.kts", "pom.xml", ".git"]
+purpose = "Kotlin source formatting"
+documentation = "https://ktlint.github.io/ktlint/latest/install/cli/"
+setup = "Install ktlint and ensure `ktlint` is available on `PATH`."
 
 [validation]
 sample = "example/Main.kt"

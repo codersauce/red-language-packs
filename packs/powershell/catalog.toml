@@ -4,3 +4,8 @@ tier = "official"
 command = "pwsh"
 purpose = "PowerShell completion, navigation, diagnostics, symbols, and formatting via PowerShell Editor Services"
 optional = true
+
+[[requirements]]
+command = "pwsh"
+purpose = "PowerShell formatting with Invoke-Formatter"
+optional = true

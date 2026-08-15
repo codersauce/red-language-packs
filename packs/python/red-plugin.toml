@@ -3,8 +3,8 @@ schema_version = 1
 [plugin]
 id = "python-language"
 name = "Python language support"
-version = "0.1.0"
-red_api = "^0.6.0"
+version = "0.2.0"
+red_api = "^0.10.0"
 description = "Python syntax highlighting, type stub support, project detection, and Pyright integration"
 repository = "https://github.com/codersauce/red-language-packs"
 license = "MIT"
@@ -27,3 +27,9 @@ highlights = [
 command = "pyright-langserver"
 args = ["--stdio"]
 root_markers = ["pyrightconfig.json", "pyproject.toml", "setup.cfg", "setup.py", "requirements.txt", "Pipfile", "uv.lock", ".git"]
+
+[languages.python.formatter]
+name = "Black"
+command = "black"
+args = ["--quiet", "--stdin-filename", "{file}", "-"]
+root_markers = ["pyproject.toml", "setup.cfg", ".git"]

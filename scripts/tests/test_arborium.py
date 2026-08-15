@@ -6,6 +6,7 @@ import hashlib
 import json
 import shutil
 import tempfile
+import tomllib
 import unittest
 from pathlib import Path
 from unittest.mock import call, patch
@@ -208,6 +209,23 @@ class ArboriumImportTests(unittest.TestCase):
             package_ids.add(package_id)
             self.assertTrue(overlay["lsp"]["command"])
 
+    def test_every_reviewed_language_declares_an_external_formatter(self) -> None:
+        for identifier in arborium.reviewed_languages():
+            with self.subTest(language=identifier):
+                overlay = arborium.load_overlay(
+                    arborium.ROOT / "arborium" / "languages" / f"{identifier}.toml"
+                )
+                self.assertEqual(overlay["package"]["red_api"], "^0.10.0")
+                self.assertTrue(overlay["formatter"]["name"])
+                self.assertTrue(overlay["formatter"]["command"])
+                manifest = tomllib.loads(
+                    (arborium.ROOT / "packs" / identifier / "red-plugin.toml").read_text()
+                )
+                self.assertEqual(
+                    manifest["languages"][identifier]["formatter"]["command"],
+                    overlay["formatter"]["command"],
+                )
+
     def test_kotlin_query_preserves_pinned_apache_provenance(self) -> None:
         kotlin = arborium.load_overlay(arborium.ROOT / "arborium" / "languages" / "kotlin.toml")
 
@@ -320,6 +338,21 @@ class ArboriumImportTests(unittest.TestCase):
         manifest.write_text(manifest.read_text().replace('command = "gopls"', 'command = "other-lsp"'))
 
         with self.assertRaisesRegex(ValueError, "reviewed external LSP"):
+            validate_pack.validate(destination)
+
+    def test_pack_validation_rejects_formatter_drift_from_reviewed_metadata(self) -> None:
+        destination = self.root / "go"
+        shutil.copytree(
+            arborium.ROOT / "packs" / "go",
+            destination,
+            ignore=shutil.ignore_patterns("grammars"),
+        )
+        manifest = destination / "red-plugin.toml"
+        manifest.write_text(
+            manifest.read_text().replace('command = "gofmt"', 'command = "other-format"')
+        )
+
+        with self.assertRaisesRegex(ValueError, "reviewed external formatter"):
             validate_pack.validate(destination)
 
     def test_catalog_release_preserves_existing_packages_and_merges_independent_targets(self) -> None:

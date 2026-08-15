@@ -1,8 +1,8 @@
 [package]
 id = "css-language"
 name = "CSS language support"
-version = "0.1.0"
-red_api = "^0.6.0"
+version = "0.2.0"
+red_api = "^0.10.0"
 description = "CSS syntax highlighting, selector support, and CSS language server integration"
 license = "MIT"
 catalog_tier = "official"
@@ -25,6 +25,15 @@ command = "vscode-css-language-server"
 args = ["--stdio"]
 root_markers = ["package.json", ".git"]
 purpose = "CSS completion, diagnostics, hover documentation, and formatting"
+
+[formatter]
+name = "Prettier"
+command = "prettier"
+args = ["--stdin-filepath", "{file}"]
+root_markers = ["package.json", ".git"]
+purpose = "CSS formatting"
+documentation = "https://prettier.io/docs/cli/"
+setup = "Install Prettier locally or globally so `prettier` is available."
 
 [validation]
 sample = "example/styles.css"

@@ -3,8 +3,8 @@ schema_version = 1
 [plugin]
 id = "java-language"
 name = "Java language support"
-version = "0.1.0"
-red_api = "^0.6.0"
+version = "0.2.0"
+red_api = "^0.10.0"
 description = "Java syntax highlighting, Maven and Gradle project detection, and JDTLS integration"
 repository = "https://github.com/codersauce/red-language-packs"
 license = "MIT"
@@ -25,4 +25,10 @@ highlights = [
 
 [languages.java.lsp]
 command = "jdtls"
+root_markers = ["pom.xml", "build.gradle", "build.gradle.kts", ".git"]
+
+[languages.java.formatter]
+name = "google-java-format"
+command = "google-java-format"
+args = ["-"]
 root_markers = ["pom.xml", "build.gradle", "build.gradle.kts", ".git"]

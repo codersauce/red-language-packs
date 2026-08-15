@@ -4,3 +4,8 @@ tier = "official"
 command = "docker-langserver"
 purpose = "Dockerfile completion, diagnostics, hover documentation, and formatting"
 optional = true
+
+[[requirements]]
+command = "dockerfmt"
+purpose = "Dockerfile formatting"
+optional = true

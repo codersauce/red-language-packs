@@ -11,6 +11,8 @@ red language trust dockerfile
 
 Native grammar approval is explicit and tied to the exact installed grammar digest. The optional `docker-langserver` language server is discovered on `PATH`; syntax highlighting works without it.
 
+The optional [dockerfmt](https://github.com/reteps/dockerfmt) formatter is launched through `dockerfmt` and receives the document on standard input. Install dockerfmt and ensure `dockerfmt` is available on `PATH`. Formatting is available through `Space f`; enable `formatting.on_save` to run it before writes.
+
 For local development:
 
 ```shell

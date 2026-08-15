@@ -3,8 +3,8 @@ schema_version = 1
 [plugin]
 id = "sql-language"
 name = "SQL language support"
-version = "0.1.0"
-red_api = "^0.6.0"
+version = "0.2.0"
+red_api = "^0.10.0"
 description = "SQL syntax highlighting, query navigation, and SQL language server integration"
 repository = "https://github.com/codersauce/red-language-packs"
 license = "MIT"
@@ -26,3 +26,9 @@ highlights = [
 [languages.sql.lsp]
 command = "sqls"
 root_markers = [".sqlfluff", ".git"]
+
+[languages.sql.formatter]
+name = "SQLFluff"
+command = "sqlfluff"
+args = ["format", "--nocolor", "--stdin-filename", "{file}", "-"]
+root_markers = [".sqlfluff", "pyproject.toml", ".git"]

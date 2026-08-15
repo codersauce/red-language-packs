@@ -77,6 +77,17 @@ def validate(pack: Path) -> dict:
             relative = safe_relative(raw, f"languages.{language_id}.grammar.injections")
             if not (pack / relative).is_file():
                 fail(f"{manifest_path}: missing {relative}")
+        formatter = language.get("formatter")
+        if not isinstance(formatter, dict):
+            fail(f"{manifest_path}: languages.{language_id}.formatter must be a table")
+        for field in ("name", "command"):
+            if not isinstance(formatter.get(field), str) or not formatter[field].strip():
+                fail(f"{manifest_path}: languages.{language_id}.formatter.{field} must be non-empty")
+        for field in ("args", "root_markers"):
+            if not isinstance(formatter.get(field, []), list) or not all(
+                isinstance(value, str) for value in formatter.get(field, [])
+            ):
+                fail(f"{manifest_path}: languages.{language_id}.formatter.{field} must contain strings")
 
     if catalog.get("tier") not in {"official", "curated"}:
         fail(f"{catalog_path}: tier must be official or curated")
@@ -115,8 +126,21 @@ def validate_arborium_overlay(pack: Path, manifest: dict, catalog: dict) -> None
             fail(f"{pack}: language.{field} differs from its reviewed Arborium overlay")
     if definition.get("lsp", {}).get("command") != overlay["lsp"]["command"]:
         fail(f"{pack}: language server differs from its reviewed external LSP command")
+    if definition.get("formatter") != {
+        key: overlay["formatter"][key]
+        for key in ("name", "command", "args", "root_markers")
+        if key in overlay["formatter"]
+    }:
+        fail(f"{pack}: formatter differs from its reviewed external formatter metadata")
     if catalog.get("tier") != package["catalog_tier"]:
         fail(f"{pack}: catalog tier differs from its reviewed Arborium overlay")
+    requirements = catalog.get("requirements", [])
+    if not any(
+        requirement.get("command") == overlay["formatter"]["command"]
+        and requirement.get("purpose") == overlay["formatter"]["purpose"]
+        for requirement in requirements
+    ):
+        fail(f"{pack}: catalog omits its reviewed external formatter requirement")
 
     captures: set[str] = set()
     for raw in definition.get("grammar", {}).get("highlights", []):

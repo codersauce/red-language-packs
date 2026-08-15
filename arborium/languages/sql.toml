@@ -1,8 +1,8 @@
 [package]
 id = "sql-language"
 name = "SQL language support"
-version = "0.1.0"
-red_api = "^0.6.0"
+version = "0.2.0"
+red_api = "^0.10.0"
 description = "SQL syntax highlighting, query navigation, and SQL language server integration"
 license = "MIT"
 catalog_tier = "official"
@@ -24,6 +24,15 @@ copyright = ["Copyright (c) 2021 Derek Stride"]
 command = "sqls"
 root_markers = [".sqlfluff", ".git"]
 purpose = "SQL completion, diagnostics, schema navigation, and formatting"
+
+[formatter]
+name = "SQLFluff"
+command = "sqlfluff"
+args = ["format", "--nocolor", "--stdin-filename", "{file}", "-"]
+root_markers = [".sqlfluff", "pyproject.toml", ".git"]
+purpose = "SQL formatting"
+documentation = "https://docs.sqlfluff.com/en/stable/reference/cli.html"
+setup = "Install SQLFluff and ensure `sqlfluff` is available on `PATH`."
 
 [validation]
 sample = "example/query.sql"

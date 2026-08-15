@@ -11,6 +11,8 @@ red language trust c-sharp
 
 Native grammar approval is explicit and tied to the exact installed grammar digest. The optional `csharp-ls` language server is discovered on `PATH`; syntax highlighting works without it.
 
+The optional [CSharpier](https://csharpier.com/docs/CLI) formatter is launched through `dotnet` and receives the document on standard input. Install CSharpier as a global or local .NET tool so `dotnet csharpier` is available. Formatting is available through `Space f`; enable `formatting.on_save` to run it before writes.
+
 For local development:
 
 ```shell

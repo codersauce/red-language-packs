@@ -4,3 +4,8 @@ tier = "official"
 command = "sourcekit-lsp"
 purpose = "Hover, completion, navigation, diagnostics, symbols, and inlay hints"
 optional = true
+
+[[requirements]]
+command = "swift"
+purpose = "Swift source formatting"
+optional = true

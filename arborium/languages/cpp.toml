@@ -1,8 +1,8 @@
 [package]
 id = "cpp-language"
 name = "C++ language support"
-version = "0.1.0"
-red_api = "^0.6.0"
+version = "0.2.0"
+red_api = "^0.10.0"
 description = "C++ syntax highlighting, inherited C queries, and clangd integration"
 license = "MIT"
 catalog_tier = "official"
@@ -24,6 +24,15 @@ copyright = ["Copyright (c) 2014 Max Brunsfeld"]
 command = "clangd"
 root_markers = ["compile_commands.json", "compile_flags.txt", "CMakeLists.txt", ".git"]
 purpose = "Hover, completion, navigation, diagnostics, formatting, and inlay hints"
+
+[formatter]
+name = "clang-format"
+command = "clang-format"
+args = ["--assume-filename", "{file}"]
+root_markers = ["compile_commands.json", "compile_flags.txt", "CMakeLists.txt", ".git"]
+purpose = "C++ source formatting"
+documentation = "https://clang.llvm.org/docs/ClangFormat.html"
+setup = "Install clang-format and ensure `clang-format` is available on `PATH`."
 
 [validation]
 sample = "example/main.cpp"

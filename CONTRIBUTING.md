@@ -50,8 +50,9 @@ independent grammar in every supported target build.
   exported symbol, and include any required external scanner.
 - Optional injected languages never silently install or approve another native
   grammar.
-- Language-server commands, root markers, and optional requirements work on
-  representative projects.
+- Language-server commands, formatter commands, root markers, and optional
+  requirements work on representative projects. Formatters must read the
+  document from stdin and emit only the formatted document on stdout.
 - Generated grammar binaries and build outputs are not committed.
 
 ## Releasing one pack

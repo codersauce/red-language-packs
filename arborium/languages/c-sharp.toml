@@ -1,8 +1,8 @@
 [package]
 id = "c-sharp-language"
 name = "C# language support"
-version = "0.1.0"
-red_api = "^0.6.0"
+version = "0.2.0"
+red_api = "^0.10.0"
 description = "C# syntax highlighting, .NET project detection, and C# language server integration"
 license = "MIT"
 catalog_tier = "official"
@@ -25,6 +25,15 @@ copyright = ["Copyright (c) 2014-2023 Max Brunsfeld, Damien Guard, Amaan Qureshi
 command = "csharp-ls"
 root_markers = ["global.json", "Directory.Build.props", ".git"]
 purpose = "Hover, completion, navigation, diagnostics, and symbols for .NET projects"
+
+[formatter]
+name = "CSharpier"
+command = "dotnet"
+args = ["csharpier", "format", "--stdin-path", "{file}"]
+root_markers = ["global.json", "Directory.Build.props", ".git"]
+purpose = "C# source formatting with CSharpier"
+documentation = "https://csharpier.com/docs/CLI"
+setup = "Install CSharpier as a global or local .NET tool so `dotnet csharpier` is available."
 
 [validation]
 sample = "example/Program.cs"
