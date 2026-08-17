@@ -1,0 +1,18 @@
+[
+  {
+    "name": "nested body",
+    "language": "c-sharp",
+    "source": "class C {\n    void M() {\n\n    }\n}",
+    "line": 2,
+    "expected": 8,
+    "width": 4
+  },
+  {
+    "name": "closing delimiter",
+    "language": "c-sharp",
+    "source": "class C {\n    void M() {\n\n    }\n}",
+    "line": 3,
+    "expected": 4,
+    "width": 4
+  }
+]

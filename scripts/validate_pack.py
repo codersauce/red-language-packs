@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import re
 import sys
 import tomllib
@@ -13,6 +14,7 @@ from pathlib import Path, PurePosixPath
 IDENTIFIER = re.compile(r"^[a-z0-9_-]+$")
 VERSION = re.compile(r"^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$")
 CAPTURE = re.compile(r"@([a-z][a-z0-9_.-]*)")
+INDENT_CAPTURES = {"indent.begin", "indent.end", "indent.branch", "indent.ignore", "indent.zero", "indent.match", "indent.continuation"}
 
 
 def fail(message: str) -> None:
@@ -68,11 +70,36 @@ def validate(pack: Path) -> dict:
             continue
         if "path" in grammar:
             safe_relative(grammar["path"], f"languages.{language_id}.grammar.path")
-        for field in ("highlights",):
+        for field in ("highlights", "textobjects", "indents"):
             for raw in grammar.get(field, []):
                 relative = safe_relative(raw, f"languages.{language_id}.grammar.{field}")
-                if not (pack / relative).is_file():
-                    fail(f"{manifest_path}: missing {relative}")
+                if not (pack / relative).is_file() or not (pack / relative).resolve().is_relative_to(pack.resolve()):
+                    fail(f"{manifest_path}: missing or unsafe {relative}")
+                if field == "indents":
+                    unsupported = set(CAPTURE.findall((pack / relative).read_text())) - INDENT_CAPTURES
+                    if unsupported:
+                        fail(f"{manifest_path}: unsupported indentation captures: {sorted(unsupported)}")
+        if grammar.get("indents"):
+            api = re.fullmatch(r"\^0\.(\d+)\.(\d+)", plugin["red_api"])
+            if api is None or tuple(map(int, api.groups())) < (12, 0):
+                fail(f"{manifest_path}: indentation queries require red_api ^0.12.0 or later")
+            fixtures = pack / "tests" / "indent.json"
+            try:
+                cases = json.loads(fixtures.read_text())
+            except (OSError, json.JSONDecodeError) as error:
+                fail(f"{fixtures}: {error}")
+            if not isinstance(cases, list) or not cases:
+                fail(f"{fixtures}: expected non-empty fixture array")
+            for case in cases:
+                if (not isinstance(case, dict)
+                    or not isinstance(case.get("name"), str) or not case["name"]
+                    or case.get("language") != language_id
+                    or not isinstance(case.get("source"), str)
+                    or type(case.get("line")) is not int
+                    or not 0 <= case["line"] < len(case["source"].split("\n"))
+                    or type(case.get("expected")) is not int or case["expected"] < 0
+                    or type(case.get("width", 4)) is not int or case.get("width", 4) <= 0):
+                    fail(f"{fixtures}: invalid indentation fixture")
         if raw := grammar.get("injections"):
             relative = safe_relative(raw, f"languages.{language_id}.grammar.injections")
             if not (pack / relative).is_file():
@@ -124,6 +151,8 @@ def validate_arborium_overlay(pack: Path, manifest: dict, catalog: dict) -> None
     for field in ("extensions", "filenames", "aliases", "comment", "indent_width"):
         if field in language and definition.get(field) != language[field]:
             fail(f"{pack}: language.{field} differs from its reviewed Arborium overlay")
+    if definition.get("grammar", {}).get("indents", []) != language.get("indent_queries", []):
+        fail(f"{pack}: indentation queries differ from the reviewed overlay")
     if definition.get("lsp", {}).get("command") != overlay["lsp"]["command"]:
         fail(f"{pack}: language server differs from its reviewed external LSP command")
     if definition.get("formatter") != {

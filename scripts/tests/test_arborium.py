@@ -215,7 +215,7 @@ class ArboriumImportTests(unittest.TestCase):
                 overlay = arborium.load_overlay(
                     arborium.ROOT / "arborium" / "languages" / f"{identifier}.toml"
                 )
-                self.assertEqual(overlay["package"]["red_api"], "^0.10.0")
+                self.assertEqual(overlay["package"]["red_api"], "^0.12.0")
                 self.assertTrue(overlay["formatter"]["name"])
                 self.assertTrue(overlay["formatter"]["command"])
                 manifest = tomllib.loads(

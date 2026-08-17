@@ -85,6 +85,12 @@ Every language server is optional and launched through a command discovered on
 module through `pwsh`. Language servers are never downloaded or bundled with
 grammar packages.
 
+## Indentation
+
+The packs include Red indentation queries and portable regression fixtures.
+See [CONTRIBUTING.md](CONTRIBUTING.md#indentation-rules) for the query workflow
+and end-to-end checks. These pack versions require Red host API 0.12.0.
+
 ## Releases
 
 Packs are released independently with tags such as `go/v0.1.0` and

@@ -1,0 +1,18 @@
+[
+  {
+    "name": "nested body",
+    "language": "css",
+    "source": ".box {\n\n}",
+    "line": 1,
+    "expected": 2,
+    "width": 2
+  },
+  {
+    "name": "closing delimiter",
+    "language": "css",
+    "source": ".box {\n\n}",
+    "line": 2,
+    "expected": 0,
+    "width": 2
+  }
+]

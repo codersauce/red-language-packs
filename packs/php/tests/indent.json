@@ -1,0 +1,18 @@
+[
+  {
+    "name": "nested body",
+    "language": "php",
+    "source": "<?php\nfunction f() {\n\n}\n",
+    "line": 2,
+    "expected": 4,
+    "width": 4
+  },
+  {
+    "name": "closing delimiter",
+    "language": "php",
+    "source": "<?php\nfunction f() {\n\n}\n",
+    "line": 3,
+    "expected": 0,
+    "width": 4
+  }
+]

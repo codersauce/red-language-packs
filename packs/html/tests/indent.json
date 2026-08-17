@@ -1,0 +1,18 @@
+[
+  {
+    "name": "nested body",
+    "language": "html",
+    "source": "<div>\n  <span>\n\n  </span>\n</div>",
+    "line": 2,
+    "expected": 4,
+    "width": 2
+  },
+  {
+    "name": "closing delimiter",
+    "language": "html",
+    "source": "<div>\n  <span>\n\n  </span>\n</div>",
+    "line": 3,
+    "expected": 2,
+    "width": 2
+  }
+]

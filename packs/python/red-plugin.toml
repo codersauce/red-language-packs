@@ -3,8 +3,8 @@ schema_version = 1
 [plugin]
 id = "python-language"
 name = "Python language support"
-version = "0.2.0"
-red_api = "^0.10.0"
+version = "0.3.0"
+red_api = "^0.12.0"
 description = "Python syntax highlighting, type stub support, project detection, and Pyright integration"
 repository = "https://github.com/codersauce/red-language-packs"
 license = "MIT"
@@ -22,6 +22,7 @@ highlights = [
     "queries/arborium-highlights.scm",
     "queries/highlights.scm",
 ]
+indents = ["queries/indents.scm"]
 
 [languages.python.lsp]
 command = "pyright-langserver"

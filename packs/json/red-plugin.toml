@@ -3,8 +3,8 @@ schema_version = 1
 [plugin]
 id = "json-language"
 name = "JSON language support"
-version = "0.2.0"
-red_api = "^0.10.0"
+version = "0.3.0"
+red_api = "^0.12.0"
 description = "JSON and JSONC syntax highlighting and JSON language server integration"
 repository = "https://github.com/codersauce/red-language-packs"
 license = "MIT"
@@ -22,6 +22,7 @@ highlights = [
     "queries/arborium-highlights.scm",
     "queries/highlights.scm",
 ]
+indents = ["queries/indents.scm"]
 
 [languages.json.lsp]
 command = "vscode-json-language-server"
