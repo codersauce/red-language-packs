@@ -1,0 +1,18 @@
+[
+  {
+    "name": "nested body",
+    "language": "powershell",
+    "source": "function Test-Thing {\n    if ($true) {\n\n    }\n}",
+    "line": 2,
+    "expected": 8,
+    "width": 4
+  },
+  {
+    "name": "closing delimiter",
+    "language": "powershell",
+    "source": "function Test-Thing {\n    if ($true) {\n\n    }\n}",
+    "line": 3,
+    "expected": 4,
+    "width": 4
+  }
+]

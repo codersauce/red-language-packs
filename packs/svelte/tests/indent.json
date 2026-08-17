@@ -1,0 +1,34 @@
+[
+  {
+    "name": "nested body",
+    "language": "svelte",
+    "source": "<div>\n  <span>\n\n  </span>\n</div>",
+    "line": 2,
+    "expected": 4,
+    "width": 2
+  },
+  {
+    "name": "closing delimiter",
+    "language": "svelte",
+    "source": "<div>\n  <span>\n\n  </span>\n</div>",
+    "line": 3,
+    "expected": 2,
+    "width": 2
+  },
+  {
+    "name": "svelte block",
+    "language": "svelte",
+    "source": "{#if ready}\n\n{/if}",
+    "line": 1,
+    "expected": 2,
+    "width": 2
+  },
+  {
+    "name": "svelte closing block",
+    "language": "svelte",
+    "source": "{#if ready}\n  text\n{/if}",
+    "line": 2,
+    "expected": 0,
+    "width": 2
+  }
+]

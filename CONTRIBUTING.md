@@ -62,3 +62,25 @@ the form `<pack>/v<manifest-version>`. The serialized release workflow builds
 target-specific archives, publishes an immutable GitHub release, merges the
 new entry into the stable `catalog-v1` asset, and leaves every other pack at its
 current version.
+
+## Indentation rules
+
+Every reviewed pack declares `language.indent_queries` in its Arborium metadata
+and ships the corresponding Red-owned query files plus `tests/indent.json`.
+The importer preserves these files and emits `grammar.indents` in the manifest.
+They require Red host API `^0.12.0`; release the compatible editor before
+publishing these pack versions.
+
+The grammar builder compiles the queries against the pinned native grammar.
+After building, run the fixtures through the actual matching Red binary:
+
+```shell
+python3 scripts/check_indents.py packs/c --red /path/to/red
+python3 scripts/check_indents.py --all --red /path/to/red
+```
+
+The runner uses disposable configuration and grammar-trust stores. It does not
+change the developer's installed packs or trust decisions. Cover an opening
+line, a closing delimiter, and relevant language-specific edge cases. Python
+keeps Red's existing language-aware provider while its queries are migrated.
+See Red's `docs/LANGUAGES.md` for the versioned query and fixture contract.

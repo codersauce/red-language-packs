@@ -84,8 +84,9 @@ def main() -> int:
                 raise ValueError(f"build the grammar before packaging: missing {grammar_path}")
             files.add(relative)
             grammar_digests[language_id] = sha256(grammar_path)
-        for raw in grammar.get("highlights", []):
-            files.add(safe_relative(raw, f"languages.{language_id}.grammar.highlights"))
+        for field in ("highlights", "textobjects", "indents"):
+            for raw in grammar.get(field, []):
+                files.add(safe_relative(raw, f"languages.{language_id}.grammar.{field}"))
         if raw := grammar.get("injections"):
             files.add(safe_relative(raw, f"languages.{language_id}.grammar.injections"))
 

@@ -1,8 +1,8 @@
 [package]
 id = "json-language"
 name = "JSON language support"
-version = "0.2.0"
-red_api = "^0.10.0"
+version = "0.3.0"
+red_api = "^0.12.0"
 description = "JSON and JSONC syntax highlighting and JSON language server integration"
 license = "MIT"
 catalog_tier = "official"
@@ -15,6 +15,7 @@ comment = "// %s"
 indent_width = 2
 symbol = "tree_sitter_json"
 highlight_overlay = "queries/highlights.scm"
+indent_queries = ["queries/indents.scm"]
 minimum_capture_scopes = ["comment", "constant.builtin", "escape", "number", "string", "string.special.key"]
 
 [provenance]

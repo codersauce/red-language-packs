@@ -376,6 +376,8 @@ def render_manifest(overlay: dict, has_injections: bool) -> str:
             "]",
         ]
     )
+    if language.get("indent_queries"):
+        lines.append(f"indents = {toml_value(language['indent_queries'])}")
     if has_injections:
         lines.append('injections = "queries/injections.scm"')
     lines.extend(["", f"[languages.{identifier}.lsp]"])
@@ -625,6 +627,10 @@ def synchronize(source: Path, settings: dict, selected: list[str], check: bool) 
         missing = set(overlay["language"].get("minimum_capture_scopes", [])) - captures
         if missing:
             raise ValueError(f"{identifier} lost required highlight scopes: {', '.join(sorted(missing))}")
+        for raw in overlay["language"].get("indent_queries", []):
+            relative = Path(raw)
+            if relative.is_absolute() or ".." in relative.parts or not (pack / relative).is_file():
+                raise ValueError(f"{identifier} has a missing or unsafe indentation query: {raw}")
         check_or_write(pack / "queries" / "arborium-highlights.scm", query, check)
         if definition.injections.is_file():
             check_or_write(

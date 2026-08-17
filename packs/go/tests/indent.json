@@ -1,0 +1,18 @@
+[
+  {
+    "name": "nested body",
+    "language": "go",
+    "source": "package main\nfunc f() {\n    if ready {\n\n    }\n}",
+    "line": 3,
+    "expected": 8,
+    "width": 4
+  },
+  {
+    "name": "closing delimiter",
+    "language": "go",
+    "source": "package main\nfunc f() {\n    if ready {\n\n    }\n}",
+    "line": 4,
+    "expected": 4,
+    "width": 4
+  }
+]

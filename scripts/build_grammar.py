@@ -147,8 +147,21 @@ def build(identifier: str, archive: Path | None) -> Path:
             if not hasattr(library, symbol):
                 raise ValueError(f"{identifier} grammar does not export required symbol {symbol}")
             validate_sample_highlighting(executable, identifier, overlay, destination)
+            validate_indentation_queries(executable, identifier, overlay, destination)
             print(f"built {identifier} ABI {expected_abi} grammar: {output}")
             return output
+
+
+def validate_indentation_queries(executable: str, identifier: str, overlay: dict, grammar_directory: Path) -> None:
+    pack = ROOT / "packs" / identifier
+    paths = overlay["language"].get("indent_queries", [])
+    if not paths:
+        return
+    combined = grammar_directory / "red-indents.scm"
+    combined.write_text("\n".join((pack / path).read_text() for path in paths))
+    configuration = grammar_directory / "red-tree-sitter-config.json"
+    subprocess.run([executable, "query", "--config-path", str(configuration), str(combined), str(pack / overlay["validation"]["sample"])], cwd=grammar_directory, check=True, stdout=subprocess.DEVNULL)
+    print(f"verified {identifier} indentation query")
 
 
 def validate_sample_highlighting(
