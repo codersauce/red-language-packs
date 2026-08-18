@@ -1,0 +1,11 @@
+tier = "official"
+
+[[requirements]]
+command = "zls"
+purpose = "Zig completion, hover, navigation, diagnostics, symbols, formatting, and inlay hints"
+optional = true
+
+[[requirements]]
+command = "zig"
+purpose = "Zig source formatting"
+optional = true

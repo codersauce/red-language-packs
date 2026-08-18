@@ -222,6 +222,32 @@ def eligibility(definition: Definition, settings: dict) -> list[str]:
     return blockers
 
 
+def reviewed_eligibility(definition: Definition, settings: dict, overlay: dict) -> list[str]:
+    """Apply the reviewed overlay exception for an otherwise unrated source.
+
+    Arborium's quality tier remains authoritative for the upstream inventory.
+    A pack may only clear an unset tier when its overlay explicitly documents a
+    reviewed, digest-pinned source that is the same repository and revision as
+    the Arborium definition. Higher-risk cases, such as a low-rated grammar or
+    a source substitution, remain blocked by the normal policy.
+    """
+    blockers = eligibility(definition, settings)
+    review = overlay.get("review", {})
+    source = overlay.get("source", {})
+    if (
+        definition.tier is None
+        and review.get("allow_unrated_arborium") is True
+        and source.get("repository") == definition.repository
+        and source.get("revision") == definition.revision
+    ):
+        blockers = [
+            blocker
+            for blocker in blockers
+            if blocker != "Arborium quality tier requires additional review"
+        ]
+    return blockers
+
+
 def injection_details(definition: Definition) -> tuple[list[str], list[str], bool]:
     if not definition.injections.is_file():
         return sorted(definition.declared_injections), [], False
@@ -293,6 +319,23 @@ def compose_highlights(
     return "\n\n".join(parts) + "\n"
 
 
+def source_query(overlay: dict, filename: str) -> str | None:
+    """Read a query from a reviewed source override when one is declared."""
+    source = overlay.get("source")
+    if not source:
+        return None
+    with extracted_archive(
+        source["repository"],
+        source["revision"],
+        source["archive_sha256"],
+        None,
+    ) as root:
+        path = root / "queries" / filename
+        if not path.is_file():
+            raise ValueError(f"{source['repository']} source override has no queries/{filename}")
+        return path.read_text(encoding="utf-8")
+
+
 def load_overlay(path: Path) -> dict:
     with path.open("rb") as handle:
         overlay = tomllib.load(handle)
@@ -323,6 +366,14 @@ def load_overlay(path: Path) -> dict:
             raise ValueError(f"{identifier} source override requires a SHA-256 archive digest")
         if not str(source.get("reason", "")).strip():
             raise ValueError(f"{identifier} source override requires a review reason")
+        archive_url(source.get("repository", ""), source["revision"])
+    if review := overlay.get("review"):
+        if review.get("allow_unrated_arborium") is not True:
+            raise ValueError(
+                f"{identifier} reviewed Arborium exceptions must explicitly allow an unrated source"
+            )
+        if not str(review.get("reason", "")).strip():
+            raise ValueError(f"{identifier} reviewed Arborium exceptions require a reason")
     formatter = overlay.get("formatter")
     if not isinstance(formatter, dict):
         raise ValueError(f"{identifier} requires reviewed external formatter metadata")
@@ -414,6 +465,11 @@ def render_readme(overlay: dict, definition: Definition) -> str:
     identifier = language["id"]
     lsp = overlay["lsp"]
     formatter = overlay["formatter"]
+    source_description = (
+        "reviewed direct grammar source and highlighting queries"
+        if overlay.get("source")
+        else "pinned Arborium grammar and highlighting queries"
+    )
     lsp_name = lsp.get("name")
     if lsp_name:
         lsp_description = (
@@ -459,7 +515,7 @@ def render_readme(overlay: dict, definition: Definition) -> str:
         f"- Upstream: <{definition.repository}>\n"
         f"- Immutable grammar revision: `{definition.revision}`\n"
         f"- Grammar license: `{definition.license}`\n"
-        "- Source: pinned Arborium grammar and highlighting queries\n\n"
+        f"- Source: {source_description}\n\n"
         "See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for complete attributions.\n"
     )
 
@@ -612,14 +668,16 @@ def synchronize(source: Path, settings: dict, selected: list[str], check: bool) 
         definition = all_definitions.get(identifier)
         if definition is None:
             raise ValueError(f"Arborium does not define selected language {identifier}")
-        if blockers := eligibility(definition, settings):
+        if blockers := reviewed_eligibility(definition, settings, overlay):
             raise ValueError(f"{identifier} cannot be published: {'; '.join(blockers)}")
         pack = ROOT / "packs" / identifier
         if "source" in overlay["validation"]:
             generated_scaffold(pack, overlay, definition, all_definitions, settings, source, check)
         if not pack.is_dir():
             raise ValueError(f"reviewed pack directory does not exist: {pack}")
-        query = compose_highlights(definition, all_definitions)
+        query = source_query(overlay, "highlights.scm") or compose_highlights(
+            definition, all_definitions
+        )
         overlay_path = pack / overlay["language"]["highlight_overlay"]
         if not overlay_path.is_file():
             raise ValueError(f"missing reviewed query overlay: {overlay_path}")
@@ -632,7 +690,9 @@ def synchronize(source: Path, settings: dict, selected: list[str], check: bool) 
             if relative.is_absolute() or ".." in relative.parts or not (pack / relative).is_file():
                 raise ValueError(f"{identifier} has a missing or unsafe indentation query: {raw}")
         check_or_write(pack / "queries" / "arborium-highlights.scm", query, check)
-        if definition.injections.is_file():
+        if injection_query := source_query(overlay, "injections.scm"):
+            check_or_write(pack / "queries" / "injections.scm", injection_query, check)
+        elif definition.injections.is_file():
             check_or_write(
                 pack / "queries" / "injections.scm",
                 definition.injections.read_text(encoding="utf-8"),

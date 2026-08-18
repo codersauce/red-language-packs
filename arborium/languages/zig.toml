@@ -1,0 +1,117 @@
+[package]
+id = "zig-language"
+name = "Zig language support"
+version = "0.1.0"
+red_api = "^0.12.0"
+description = "Zig syntax highlighting, ZLS integration, and zig fmt formatting"
+license = "MIT"
+catalog_tier = "official"
+
+[language]
+id = "zig"
+extensions = ["zig"]
+aliases = ["ziglang"]
+comment = "// %s"
+indent_width = 4
+symbol = "tree_sitter_zig"
+highlight_overlay = "queries/highlights.scm"
+indent_queries = ["queries/indents.scm"]
+minimum_capture_scopes = [
+    "comment",
+    "constant",
+    "constant.builtin",
+    "function",
+    "function.builtin",
+    "function.call",
+    "keyword",
+    "keyword.function",
+    "keyword.import",
+    "keyword.modifier",
+    "number",
+    "operator",
+    "punctuation.bracket",
+    "punctuation.delimiter",
+    "string",
+    "string.escape",
+    "type",
+    "type.builtin",
+    "variable",
+    "variable.member",
+    "variable.parameter",
+]
+
+[review]
+allow_unrated_arborium = true
+reason = "Arborium does not assign Zig a quality tier; Red independently reviewed the maintained MIT grammar and pins the exact upstream source below."
+
+[source]
+repository = "https://github.com/tree-sitter-grammars/tree-sitter-zig"
+revision = "6479aa13f32f701c383083d8b28360ebd682fb7d"
+archive_sha256 = "34b338658c7548ea7e723b9a74a18bba76d16bf453bc4a9deb13f2f507f4e725"
+reason = "Use the maintained MIT Zig grammar directly and bind the reviewed source bytes to an immutable commit and archive digest."
+
+[provenance]
+copyright = ["Copyright (c) 2024 Amaan Qureshi <amaanq12@gmail.com>"]
+
+[lsp]
+command = "zls"
+root_markers = ["build.zig.zon", "build.zig", ".git"]
+purpose = "Zig completion, hover, navigation, diagnostics, symbols, formatting, and inlay hints"
+name = "Zig Language Server"
+documentation = "https://github.com/zigtools/zls"
+setup = "Install a ZLS release compatible with your Zig toolchain and ensure `zls` is available on `PATH`."
+
+[formatter]
+name = "zig fmt"
+command = "zig"
+args = ["fmt", "--stdin"]
+root_markers = ["build.zig.zon", "build.zig", ".git"]
+purpose = "Zig source formatting"
+documentation = "https://ziglang.org/documentation/master/"
+setup = "Install Zig and ensure `zig` is available on `PATH`."
+
+[validation]
+sample = "example/main.zig"
+source = '''// A representative Zig source file for Red's grammar checks.
+const std = @import("std");
+
+const DEFAULT_GREETING: []const u8 = "Hello";
+
+const Greeter = struct {
+    prefix: []const u8,
+
+    pub fn greet(self: *const Greeter, name: []const u8) void {
+        const message = "{s}, {s}! {d}\n";
+        std.debug.print(message, .{ self.prefix, name, 42 });
+        _ = undefined;
+    }
+};
+
+pub fn main() void {
+    var greeter = Greeter{ .prefix = DEFAULT_GREETING };
+    greeter.greet("Red");
+}
+'''
+required_captures = [
+    "comment",
+    "constant",
+    "constant.builtin",
+    "function",
+    "function.builtin",
+    "function.call",
+    "keyword",
+    "keyword.function",
+    "keyword.import",
+    "keyword.modifier",
+    "number",
+    "operator",
+    "punctuation.bracket",
+    "punctuation.delimiter",
+    "string",
+    "string.escape",
+    "type",
+    "type.builtin",
+    "variable",
+    "variable.member",
+    "variable.parameter",
+]

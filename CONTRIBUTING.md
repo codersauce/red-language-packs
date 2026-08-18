@@ -33,6 +33,12 @@ Validation matrices and release tags discover reviewed pack slugs directly from
 `arborium/languages/`; adding a reviewed metadata file automatically includes its
 independent grammar in every supported target build.
 
+An Arborium definition with no quality tier remains blocked by default. A
+reviewed overlay may opt into the narrow exception only when it includes an
+exact, digest-pinned source override for the same repository and commit plus a
+`[review]` rationale. This records Red's independent source review without
+changing Arborium's upstream inventory or allowing low-rated grammars through.
+
 ## Review checklist
 
 - The package ID and language IDs are stable and do not collide with an existing

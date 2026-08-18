@@ -1,0 +1,26 @@
+[
+  {
+    "name": "function body",
+    "language": "zig",
+    "source": "pub fn main() void {\nstd.debug.print(\"hello\", .{});\n}\n",
+    "line": 1,
+    "expected": 4,
+    "width": 4
+  },
+  {
+    "name": "closing function body",
+    "language": "zig",
+    "source": "pub fn main() void {\nstd.debug.print(\"hello\", .{});\n}\n",
+    "line": 2,
+    "expected": 0,
+    "width": 4
+  },
+  {
+    "name": "nested initializer",
+    "language": "zig",
+    "source": "const config = .{\nname: \"red\",\n};\n",
+    "line": 1,
+    "expected": 4,
+    "width": 4
+  }
+]

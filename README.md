@@ -25,6 +25,7 @@ installation state, and native-grammar approval boundary.
 - `packs/svelte` — Svelte highlighting with embedded scripts and styles.
 - `packs/swift` — Swift highlighting and SourceKit-LSP integration.
 - `packs/vue` — Vue single-file component highlighting and Vue language server integration.
+- `packs/zig` — Zig highlighting, ZLS integration, and `zig fmt` formatting.
 
 Browse the published catalog with `red plugin catalog`, or install a pack by
 its stable ID:
@@ -35,6 +36,7 @@ red plugin install --catalog html-language
 red plugin install --catalog powershell-language
 red plugin install --catalog python-language
 red plugin install --catalog swift-language
+red plugin install --catalog zig-language
 ```
 
 Native grammar approval remains a separate, digest-bound user decision. Add

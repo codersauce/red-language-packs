@@ -68,6 +68,25 @@ class ArboriumImportTests(unittest.TestCase):
                 blockers = arborium.eligibility(definition, self.settings)
                 self.assertTrue(any(expected in blocker for blocker in blockers))
 
+    def test_reviewed_source_exception_only_clears_an_exact_unrated_source(self) -> None:
+        definition = self.definition("zig", tier=None)
+        overlay = {
+            "review": {
+                "allow_unrated_arborium": True,
+                "reason": "Reviewed directly from the pinned upstream grammar.",
+            },
+            "source": {
+                "repository": definition.repository,
+                "revision": definition.revision,
+            },
+        }
+
+        self.assertEqual(arborium.reviewed_eligibility(definition, self.settings, overlay), [])
+
+        overlay["source"]["revision"] = "b" * 40
+        blockers = arborium.reviewed_eligibility(definition, self.settings, overlay)
+        self.assertTrue(any("additional review" in blocker for blocker in blockers))
+
     def test_query_inheritance_prepends_missing_parent_without_duplicating_existing_parent(self) -> None:
         javascript = self.definition("javascript", "(identifier) @variable\n")
         typescript = self.definition(
@@ -195,6 +214,7 @@ class ArboriumImportTests(unittest.TestCase):
                 "svelte",
                 "swift",
                 "vue",
+                "zig",
             ],
         )
 

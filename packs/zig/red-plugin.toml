@@ -1,0 +1,36 @@
+schema_version = 1
+
+[plugin]
+id = "zig-language"
+name = "Zig language support"
+version = "0.1.0"
+red_api = "^0.12.0"
+description = "Zig syntax highlighting, ZLS integration, and zig fmt formatting"
+repository = "https://github.com/codersauce/red-language-packs"
+license = "MIT"
+
+[languages.zig]
+extensions = ["zig"]
+aliases = ["ziglang"]
+comment = "// %s"
+indent_width = 4
+
+[languages.zig.grammar]
+path = "grammars/zig.so"
+symbol = "tree_sitter_zig"
+highlights = [
+    "queries/arborium-highlights.scm",
+    "queries/highlights.scm",
+]
+indents = ["queries/indents.scm"]
+injections = "queries/injections.scm"
+
+[languages.zig.lsp]
+command = "zls"
+root_markers = ["build.zig.zon", "build.zig", ".git"]
+
+[languages.zig.formatter]
+name = "zig fmt"
+command = "zig"
+args = ["fmt", "--stdin"]
+root_markers = ["build.zig.zon", "build.zig", ".git"]
