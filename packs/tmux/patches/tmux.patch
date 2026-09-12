@@ -1,0 +1,11 @@
+--- a/grammar.js
++++ b/grammar.js
+@@ -881,7 +881,7 @@
+         $.channel,
+       ),
+ 
+-    option: _ => /@?[A-Za-z-_\d]+/,
++    option: _ => /@?[A-Za-z_\d-]+(\[\d+\])?/,
+ 
+     _word: _ => /([^"'`#;\s\\]|\\.)+/,
+     _string: $ =>

@@ -16,6 +16,7 @@ import urllib.parse
 from pathlib import Path
 
 from validate_pack import safe_relative, validate
+from arborium import grammar_overlays, load_overlay, source_patch_paths
 
 
 COMMIT = re.compile(r"^[0-9a-fA-F]{40}$")
@@ -72,6 +73,10 @@ def main() -> int:
         Path("LICENSE"),
         Path("THIRD_PARTY_NOTICES.md"),
     }
+    overlay_path = repo / "arborium" / "languages" / f"{slug}.toml"
+    if overlay_path.is_file():
+        for overlay in grammar_overlays(load_overlay(overlay_path)):
+            files.update(path.relative_to(pack) for path in source_patch_paths(overlay, pack))
     grammar_digests: dict[str, str] = {}
     for language_id, language in manifest["languages"].items():
         grammar = language.get("grammar")

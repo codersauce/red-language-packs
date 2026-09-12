@@ -1,0 +1,7 @@
+#[fg=green,bg=#112233,bold]#{session_name}#[default]
+#{?pane_in_mode,copy,#{pane_current_command}}
+#{==:#{host},workstation} #I:#W %H:%M
+#{b:pane_current_path} #(printf hello)
+#{@theme2} #{?#{==:#{host},workstation},work,home}
+#{?pane_in_mode,,#{pane_current_command}} #{?pane_in_mode,copy,}
+#{E:@theme2}

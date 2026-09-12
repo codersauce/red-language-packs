@@ -1,0 +1,2 @@
+# Source patch digests must remain identical in Windows checkouts.
+packs/*/patches/*.patch text eol=lf

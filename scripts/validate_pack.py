@@ -10,10 +10,18 @@ import sys
 import tomllib
 from pathlib import Path, PurePosixPath
 
+from arborium import grammar_overlays, is_standalone, load_overlay, source_patch_paths
+
 
 IDENTIFIER = re.compile(r"^[a-z0-9_-]+$")
 VERSION = re.compile(r"^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$")
 CAPTURE = re.compile(r"@([a-z][a-z0-9_.-]*)")
+QUERY_TOKEN = re.compile(r'"(?:\\.|[^"\\])*"|;[^\n]*|[()]|[^\s();"]+')
+TEXT_PREDICATES = {
+    "eq?", "not-eq?", "any-eq?", "any-not-eq?",
+    "match?", "not-match?", "any-match?", "any-not-match?",
+    "any-of?", "not-any-of?",
+}
 INDENT_CAPTURES = {"indent.begin", "indent.end", "indent.branch", "indent.ignore", "indent.zero", "indent.match", "indent.continuation"}
 
 
@@ -36,7 +44,35 @@ def load_toml(path: Path) -> dict:
         fail(f"failed to read {path}: {error}")
 
 
+def validate_query_predicates(path: Path, *, injections: bool = False) -> None:
+    """Reject runtime query operations Red does not evaluate, ignoring quoted text and comments."""
+    tokens = [token for token in QUERY_TOKEN.findall(path.read_text()) if not token.startswith(";")]
+    for index, token in enumerate(tokens[:-1]):
+        if token != "(" or not tokens[index + 1].startswith("#"):
+            continue
+        operator = tokens[index + 1][1:]
+        if operator in TEXT_PREDICATES:
+            continue
+        if injections and operator == "set!" and tokens[index + 2:index + 3] == ["injection.language"]:
+            continue
+        fail(f"{path}: unsupported Red query predicate or directive #{operator}")
+
+
+def validate_formatter(formatter: object, label: str) -> None:
+    if not isinstance(formatter, dict):
+        fail(f"{label} must be a table")
+    for field in ("name", "command"):
+        if not isinstance(formatter.get(field), str) or not formatter[field].strip():
+            fail(f"{label}.{field} must be non-empty")
+    for field in ("args", "root_markers"):
+        if not isinstance(formatter.get(field, []), list) or not all(
+            isinstance(value, str) for value in formatter.get(field, [])
+        ):
+            fail(f"{label}.{field} must contain strings")
+
+
 def validate(pack: Path) -> dict:
+    """Audit standalone/manual queries strictly while preserving reviewed Arborium behavior."""
     manifest_path = pack / "red-plugin.toml"
     catalog_path = pack / "catalog.toml"
     manifest = load_toml(manifest_path)
@@ -62,6 +98,11 @@ def validate(pack: Path) -> dict:
     languages = manifest.get("languages")
     if not isinstance(languages, dict) or not languages:
         fail(f"{manifest_path}: a language pack must define [languages.*]")
+    overlay_path = Path(__file__).resolve().parent.parent / "arborium" / "languages" / f"{pack.name}.toml"
+    overlay = load_overlay(overlay_path) if overlay_path.is_file() else None
+    strict_query_languages = set(languages) if overlay is None else {
+        grammar["language"]["id"] for grammar in grammar_overlays(overlay) if is_standalone(grammar)
+    }
     for language_id, language in languages.items():
         if not IDENTIFIER.fullmatch(language_id):
             fail(f"{manifest_path}: invalid language id {language_id!r}")
@@ -75,6 +116,8 @@ def validate(pack: Path) -> dict:
                 relative = safe_relative(raw, f"languages.{language_id}.grammar.{field}")
                 if not (pack / relative).is_file() or not (pack / relative).resolve().is_relative_to(pack.resolve()):
                     fail(f"{manifest_path}: missing or unsafe {relative}")
+                if field == "highlights" and language_id in strict_query_languages:
+                    validate_query_predicates(pack / relative)
                 if field == "indents":
                     unsupported = set(CAPTURE.findall((pack / relative).read_text())) - INDENT_CAPTURES
                     if unsupported:
@@ -104,17 +147,10 @@ def validate(pack: Path) -> dict:
             relative = safe_relative(raw, f"languages.{language_id}.grammar.injections")
             if not (pack / relative).is_file():
                 fail(f"{manifest_path}: missing {relative}")
-        formatter = language.get("formatter")
-        if not isinstance(formatter, dict):
-            fail(f"{manifest_path}: languages.{language_id}.formatter must be a table")
-        for field in ("name", "command"):
-            if not isinstance(formatter.get(field), str) or not formatter[field].strip():
-                fail(f"{manifest_path}: languages.{language_id}.formatter.{field} must be non-empty")
-        for field in ("args", "root_markers"):
-            if not isinstance(formatter.get(field, []), list) or not all(
-                isinstance(value, str) for value in formatter.get(field, [])
-            ):
-                fail(f"{manifest_path}: languages.{language_id}.formatter.{field} must contain strings")
+            if language_id in strict_query_languages:
+                validate_query_predicates(pack / relative, injections=True)
+        if "formatter" in language:
+            validate_formatter(language["formatter"], f"{manifest_path}: languages.{language_id}.formatter")
 
     if catalog.get("tier") not in {"official", "curated"}:
         fail(f"{catalog_path}: tier must be official or curated")
@@ -129,47 +165,92 @@ def validate(pack: Path) -> dict:
     for required in ("README.md", "LICENSE", "THIRD_PARTY_NOTICES.md", "build-grammar.sh"):
         if not (pack / required).is_file():
             fail(f"{pack}: missing {required}")
-    validate_arborium_overlay(pack, manifest, catalog)
+    if overlay is not None:
+        validate_arborium_overlay(pack, manifest, catalog, overlay)
     return manifest
 
 
-def validate_arborium_overlay(pack: Path, manifest: dict, catalog: dict) -> None:
-    overlay_path = Path(__file__).resolve().parent.parent / "arborium" / "languages" / f"{pack.name}.toml"
-    if not overlay_path.is_file():
-        return
-    overlay = load_toml(overlay_path)
+def validate_arborium_overlay(pack: Path, manifest: dict, catalog: dict, overlay: dict) -> None:
     package = overlay["package"]
-    language = overlay["language"]
-    identifier = language["id"]
     plugin = manifest["plugin"]
     for field in ("id", "name", "version", "red_api", "description", "license"):
         if plugin.get(field) != package.get(field):
             fail(f"{pack}: generated plugin.{field} differs from its reviewed Arborium overlay")
+    if catalog.get("tier") != package["catalog_tier"]:
+        fail(f"{pack}: catalog tier differs from its reviewed Arborium overlay")
+    grammars = grammar_overlays(overlay)
+    if set(manifest["languages"]) != {grammar["language"]["id"] for grammar in grammars}:
+        fail(f"{pack}: manifest languages differ from its reviewed metadata")
+    for grammar in grammars:
+        validate_language_overlay(pack, manifest, catalog, grammar)
+
+
+def validate_language_overlay(pack: Path, manifest: dict, catalog: dict, overlay: dict) -> None:
+    language = overlay["language"]
+    identifier = language["id"]
+    validation = overlay.get("validation", {})
+    if "reject_parse_errors" in validation and not isinstance(validation["reject_parse_errors"], bool):
+        fail(f"{pack}: {identifier} reject_parse_errors must be boolean")
+    for field in ("capture_assertions", "injection_assertions"):
+        assertions = validation.get(field, [])
+        if not isinstance(assertions, list):
+            fail(f"{pack}: {identifier} {field} must be an array of tables")
+        for assertion in assertions:
+            if not isinstance(assertion, dict) or not all(
+                isinstance(assertion.get(key), str) and assertion[key]
+                for key in ("capture", "text")
+            ):
+                fail(f"{pack}: {identifier} {field} requires non-empty capture and text")
+            if not isinstance(assertion.get("must_exist", True), bool):
+                fail(f"{pack}: {identifier} {field} must_exist must be boolean")
+            positions = [key in assertion for key in ("row", "column")]
+            if any(positions) and (not all(positions) or not all(
+                type(assertion[key]) is int and assertion[key] >= 0 for key in ("row", "column")
+            )):
+                fail(f"{pack}: {identifier} {field} requires non-negative row and column")
     definition = manifest["languages"].get(identifier)
     if not isinstance(definition, dict):
         fail(f"{pack}: reviewed Arborium language {identifier} is missing from the manifest")
-    for field in ("extensions", "filenames", "aliases", "comment", "indent_width"):
-        if field in language and definition.get(field) != language[field]:
+    for field in ("extensions", "filenames", "aliases", "shebangs"):
+        if definition.get(field, []) != language.get(field, []):
+            fail(f"{pack}: language.{field} differs from its reviewed Arborium overlay")
+    for field in ("comment", "indent_width"):
+        if definition.get(field) != language.get(field):
             fail(f"{pack}: language.{field} differs from its reviewed Arborium overlay")
     if definition.get("grammar", {}).get("indents", []) != language.get("indent_queries", []):
         fail(f"{pack}: indentation queries differ from the reviewed overlay")
-    if definition.get("lsp", {}).get("command") != overlay["lsp"]["command"]:
+    lsp = overlay.get("lsp")
+    expected_lsp = {
+        key: lsp[key] for key in ("command", "args", "root_markers") if key in lsp
+    } if lsp is not None else None
+    if definition.get("lsp") != expected_lsp:
         fail(f"{pack}: language server differs from its reviewed external LSP command")
-    if definition.get("formatter") != {
-        key: overlay["formatter"][key]
+    formatter = overlay.get("formatter")
+    expected_formatter = {
+        key: formatter[key]
         for key in ("name", "command", "args", "root_markers")
-        if key in overlay["formatter"]
-    }:
+        if key in formatter
+    } if formatter is not None else None
+    if definition.get("formatter") != expected_formatter:
         fail(f"{pack}: formatter differs from its reviewed external formatter metadata")
-    if catalog.get("tier") != package["catalog_tier"]:
-        fail(f"{pack}: catalog tier differs from its reviewed Arborium overlay")
     requirements = catalog.get("requirements", [])
-    if not any(
-        requirement.get("command") == overlay["formatter"]["command"]
-        and requirement.get("purpose") == overlay["formatter"]["purpose"]
-        for requirement in requirements
-    ):
-        fail(f"{pack}: catalog omits its reviewed external formatter requirement")
+    for tool, label in ((lsp, "LSP"), (formatter, "formatter")):
+        if tool is not None and not any(
+            requirement.get("command") == tool["command"]
+            and requirement.get("purpose") == tool["purpose"]
+            for requirement in requirements
+        ):
+            fail(f"{pack}: catalog omits its reviewed external {label} requirement")
+
+    grammar = definition.get("grammar", {})
+    if is_standalone(overlay):
+        source_patch_paths(overlay, pack)
+        if grammar.get("highlights") != [language["highlight_overlay"]]:
+            fail(f"{pack}: standalone {identifier} must load only its reviewed highlight query")
+        if grammar.get("injections") != language.get("injections"):
+            fail(f"{pack}: standalone {identifier} injections differ from its reviewed metadata")
+        if grammar.get("path") != f"grammars/{identifier}.so" or grammar.get("symbol") != language["symbol"]:
+            fail(f"{pack}: standalone {identifier} grammar differs from its reviewed metadata")
 
     captures: set[str] = set()
     for raw in definition.get("grammar", {}).get("highlights", []):

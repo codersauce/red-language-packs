@@ -1,0 +1,40 @@
+--- a/grammar.js
++++ b/grammar.js
+@@ -24,7 +24,7 @@
+     _character: _ => token.immediate(/[^@#%,}]/),
+     user_variable: $ => seq(
+       '@',
+-      alias(token.immediate(/[-_a-zA-Z]+/), $.identifier),
++      alias(token.immediate(/[-_a-zA-Z][-_a-zA-Z0-9]*/), $.identifier),
+     ),
+     format: _ => seq(
+       '%',
+@@ -47,7 +47,7 @@
+     expansion: _ => seq(
+       '#',
+       token.immediate('{'),
+-      /[-_a-zA-Z]+/,
++      /@?[-_a-zA-Z][-_a-zA-Z0-9]*/,
+       '}',
+     ),
+     shell: _ => /[^)]+/,
+@@ -74,14 +74,11 @@
+       '#',
+       token.immediate('{'),
+       token.immediate('?'),
+-      repeat1(
+-        seq(
+-          $.condition,
+-          ',',
+-          optional($.pattern),
+-        )
+-      ),
+-      optional(seq(',', optional($.pattern))),
++      choice($.condition, $.variable),
++      ',',
++      optional($.pattern),
++      ',',
++      optional($.pattern),
+       '}',
+     ),
+     binary: $ => seq(

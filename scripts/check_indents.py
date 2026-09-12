@@ -15,6 +15,9 @@ from validate_pack import validate
 
 def check(pack: Path, red: Path) -> None:
     manifest = validate(pack)
+    if not any(language.get("grammar", {}).get("indents") for language in manifest["languages"].values()):
+        print(f"skipped {manifest['plugin']['id']}: no indentation queries declared")
+        return
     for language in manifest["languages"].values():
         grammar = language.get("grammar", {})
         if grammar.get("path") and not (pack / grammar["path"]).is_file():
