@@ -1,2 +1,5 @@
 # Source patch digests must remain identical in Windows checkouts.
 packs/*/patches/*.patch text eol=lf
+
+# tmux validation fixtures require LF for continuations and exact byte captures.
+packs/tmux/example/* text eol=lf
