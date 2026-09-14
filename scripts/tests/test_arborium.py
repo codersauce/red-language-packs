@@ -213,12 +213,13 @@ class ArboriumImportTests(unittest.TestCase):
                 "sql",
                 "svelte",
                 "swift",
+                "tmux",
                 "vue",
                 "zig",
             ],
         )
 
-    def test_every_reviewed_language_keeps_a_distinct_package_and_external_server(self) -> None:
+    def test_every_reviewed_language_keeps_a_distinct_package_and_optional_external_server(self) -> None:
         package_ids = set()
         for identifier in arborium.reviewed_languages():
             overlay = arborium.load_overlay(
@@ -227,20 +228,28 @@ class ArboriumImportTests(unittest.TestCase):
             package_id = overlay["package"]["id"]
             self.assertNotIn(package_id, package_ids)
             package_ids.add(package_id)
-            self.assertTrue(overlay["lsp"]["command"])
+            if "lsp" in overlay:
+                self.assertTrue(overlay["lsp"]["command"])
+            else:
+                self.assertEqual(identifier, "tmux")
 
-    def test_every_reviewed_language_declares_an_external_formatter(self) -> None:
+    def test_every_declared_formatter_matches_reviewed_metadata(self) -> None:
         for identifier in arborium.reviewed_languages():
             with self.subTest(language=identifier):
                 overlay = arborium.load_overlay(
                     arborium.ROOT / "arborium" / "languages" / f"{identifier}.toml"
                 )
-                self.assertEqual(overlay["package"]["red_api"], "^0.12.0")
-                self.assertTrue(overlay["formatter"]["name"])
-                self.assertTrue(overlay["formatter"]["command"])
+                expected_api = "^0.10.0" if identifier == "tmux" else "^0.12.0"
+                self.assertEqual(overlay["package"]["red_api"], expected_api)
                 manifest = tomllib.loads(
                     (arborium.ROOT / "packs" / identifier / "red-plugin.toml").read_text()
                 )
+                if "formatter" not in overlay:
+                    self.assertEqual(identifier, "tmux")
+                    self.assertNotIn("formatter", manifest["languages"][identifier])
+                    continue
+                self.assertTrue(overlay["formatter"]["name"])
+                self.assertTrue(overlay["formatter"]["command"])
                 self.assertEqual(
                     manifest["languages"][identifier]["formatter"]["command"],
                     overlay["formatter"]["command"],

@@ -1,0 +1,195 @@
+[package]
+id = "tmux-language"
+name = "tmux language support"
+version = "0.1.0"
+red_api = "^0.10.0"
+description = "tmux configuration syntax highlighting with embedded status formats and styles"
+license = "MIT"
+catalog_tier = "official"
+
+[documentation]
+notes = '''## Syntax coverage
+
+The pack highlights commands, flags, built-in and user options, key bindings,
+comments, strings, numbers, hooks, and `%if`/`%elif`/`%else`/`%endif` directives.
+The bundled `tmuxf` grammar adds status-format variables, nested conditions,
+format functions, and inline styles such as `#[fg=green,bold]` in the reviewed
+format contexts. These include `set`/`setw` format options, status-left/right,
+format arguments, display messages, and `if-shell -F` conditions.
+
+Two small, digest-verified source patches cover common configuration syntax:
+
+- [tmux.patch](patches/tmux.patch) accepts numeric option-array indices such as
+  `status-format[0]`.
+- [tmuxf.patch](patches/tmuxf.patch) accepts user-variable formats such as
+  `#{@theme2}` and nested conditions such as
+  `#{?#{==:#{host},workstation},work,home}`.
+
+Remaining upstream limitations:
+
+- Quote format expressions in `%if` and `%elif`; the parser does not recognize
+  unquoted expressions beginning with `#{` in those directives.
+- Ordinary commas in format text outside expressions can cause parser recovery.
+  The surrounding text and following format expressions still receive highlighting.
+- Raw style values such as `fg=white,bg=black` keep string coloring. Detailed style
+  highlighting applies to inline `#[...]` styles inside format strings.
+
+Shell-command contents and arbitrary plugin-option strings receive string
+highlighting; they do not load additional language grammars.
+'''
+
+[language]
+id = "tmux"
+name = "tmux"
+extensions = []
+filenames = [".tmux.conf", "tmux.conf", ".tmux.conf.local", "tmux.conf.local"]
+aliases = ["tmux-conf"]
+comment = "# %s"
+indent_width = 2
+symbol = "tree_sitter_tmux"
+highlight_overlay = "queries/highlights.scm"
+injections = "queries/injections.scm"
+minimum_capture_scopes = ["comment", "function.builtin", "keyword.conditional", "string", "variable", "property", "variable.parameter", "constant.builtin"]
+
+[source]
+kind = "standalone"
+repository = "https://github.com/Freed-Wu/tree-sitter-tmux"
+revision = "58147321fa1f00daec15dd4d371bc9e2e9373459"
+archive_sha256 = "9ecfcc82c6be13a2e3a8e92fe033dbcc81d91548df5ff7c9189bdb4ed9e75785"
+license = "MIT"
+has_scanner = false
+reason = "The pinned Arborium inventory has no tmux grammar; use the reviewed upstream grammar and a packaged tmuxf companion for embedded formats."
+patches = [{ path = "patches/tmux.patch", sha256 = "c6d4abe5a33f944c8f7e771c14664da014f28825110d78f821d35c745879656c" }]
+
+[provenance]
+copyright = ["Copyright (c) 2024 Neorocks"]
+
+[validation]
+sample = "example/.tmux.conf"
+reject_parse_errors = true
+required_captures = ["comment", "function.builtin", "keyword.import", "keyword.conditional", "string", "variable", "property", "variable.parameter", "constant.builtin"]
+source = '''# Representative tmux configuration for Red.
+set -g mouse on
+set-option -g history-limit 10000
+set -g @plugin 'tmux-plugins/tpm'
+set -g @literal 'literal # text'
+bind-key -n C-Space next-window
+bind-key -T copy-mode-vi v send-keys -X begin-selection
+bind r source-file ~/.tmux.conf \; display-message "Reloaded #{session_name}"
+set -g status-left '#[fg=green]#{session_name}#[default]'
+set -g status-right \
+  '#{?pane_in_mode,copy,#{pane_current_command}} %H:%M'
+setw -g window-status-current-format "#[bold]#I:#W#[default]"
+set -g automatic-rename-format '#{pane_current_command}'
+set -g status-style 'fg=white,bg=black'
+list-windows -F '#{window_index}:#{window_name}'
+display-message '#{session_name}:#{window_index}'
+if-shell -F '#{==:#{host},workstation}' 'display-message "work"'
+run-shell 'printf "literal #{shell}"'
+%if '#{==:#{host},workstation}'
+  set -g status-position top
+%elif '#{==:#{host},laptop}'
+  set -g status-position bottom
+%else
+  set -g status off
+%endif
+set-hook -g after-new-window 'display-message "#{window_name}"'
+set -g @theme2 dark
+set -g status-format[0] '#{@theme2}:#{?#{==:#{host},workstation},work,home}'
+set -g @plugin-format '#{literal}'
+'''
+capture_assertions = [
+  { capture = "function.builtin", text = "set", row = 1, column = 0 },
+  { capture = "property", text = "mouse" },
+  { capture = "constant.builtin", text = "on" },
+  { capture = "constant.builtin", text = "10000" },
+  { capture = "variable", text = "@plugin" },
+  { capture = "property", text = "@plugin", must_exist = false },
+  { capture = "variable.parameter", text = "-n" },
+  { capture = "constant.builtin", text = "C-Space" },
+  { capture = "constant.builtin", text = "copy-mode-vi" },
+  { capture = "keyword.import", text = "source-file" },
+  { capture = "keyword.conditional", text = "%if" },
+  { capture = "keyword.conditional", text = "%elif" },
+  { capture = "keyword.conditional", text = "%else" },
+  { capture = "keyword.conditional", text = "%endif" },
+  { capture = "property", text = "after-new-window" },
+  { capture = "property", text = "status-format[0]" },
+  { capture = "variable", text = "@theme2" },
+  { capture = "string", text = "literal # text" },
+  { capture = "comment", text = "literal # text", must_exist = false },
+]
+injection_assertions = [
+  { capture = "injection.content", text = "#[fg=green]#{session_name}#[default]" },
+  { capture = "injection.content", text = "#{?pane_in_mode,copy,#{pane_current_command}} %H:%M" },
+  { capture = "injection.content", text = "#[bold]#I:#W#[default]" },
+  { capture = "injection.content", text = "#{pane_current_command}" },
+  { capture = "injection.content", text = "#{window_index}:#{window_name}" },
+  { capture = "injection.content", text = "#{session_name}:#{window_index}" },
+  { capture = "injection.content", text = "#{==:#{host},workstation}", row = 16, column = 13 },
+  { capture = "injection.content", text = "#{==:#{host},workstation}", row = 18, column = 5 },
+  { capture = "injection.content", text = "#{==:#{host},laptop}" },
+  { capture = "injection.content", text = "#{@theme2}:#{?#{==:#{host},workstation},work,home}" },
+  { capture = "injection.content", text = "literal # text", must_exist = false },
+  { capture = "injection.content", text = "tmux-plugins/tpm", must_exist = false },
+  { capture = "injection.content", text = "#{literal}", must_exist = false },
+  { capture = "injection.content", text = 'printf "literal #{shell}"', must_exist = false },
+  { capture = "injection.content", text = "fg=white,bg=black", must_exist = false },
+]
+
+[[companions]]
+
+[companions.language]
+id = "tmuxf"
+name = "tmux format strings"
+extensions = []
+filenames = []
+aliases = []
+symbol = "tree_sitter_tmuxf"
+highlight_overlay = "queries/tmuxf-highlights.scm"
+minimum_capture_scopes = ["variable.builtin", "variable", "property", "constant.builtin", "function.call", "punctuation.bracket", "punctuation.delimiter", "punctuation.special", "operator"]
+
+[companions.source]
+kind = "standalone"
+repository = "https://github.com/Freed-Wu/tree-sitter-tmuxf"
+revision = "bf2eee4772551c0801ece5e746c6016b9cb61ab2"
+archive_sha256 = "f151ea060d511b2d3eb1266f4d4da6f11c8e2e98d019b78f065ad566c464a5c9"
+license = "MIT"
+has_scanner = false
+reason = "Current tmux grammar delegates format expressions and inline styles to tmuxf; bundle the reviewed grammar in the same package without claiming file selectors."
+patches = [{ path = "patches/tmuxf.patch", sha256 = "c53436b203257bffdc1e5bcdb419437de843817ccf4b72d6c44192dde2ba2e10" }]
+
+[companions.provenance]
+copyright = ["Copyright (c) 2024 Neorocks"]
+
+[companions.validation]
+sample = "example/formats.tmuxf"
+reject_parse_errors = true
+required_captures = ["variable.builtin", "variable", "property", "constant.builtin", "function.call", "string", "punctuation.bracket", "punctuation.delimiter", "punctuation.special", "operator"]
+source = '''#[fg=green,bg=#112233,bold]#{session_name}#[default]
+#{?pane_in_mode,copy,#{pane_current_command}}
+#{==:#{host},workstation} #I:#W %H:%M
+#{b:pane_current_path} #(printf hello)
+#{@theme2} #{?#{==:#{host},workstation},work,home}
+#{?pane_in_mode,,#{pane_current_command}} #{?pane_in_mode,copy,}
+#{E:@theme2}
+'''
+capture_assertions = [
+  { capture = "property", text = "fg", row = 0, column = 2 },
+  { capture = "constant.builtin", text = "green" },
+  { capture = "constant.builtin", text = "#112233" },
+  { capture = "property", text = "bold" },
+  { capture = "variable.builtin", text = "#{session_name}" },
+  { capture = "variable", text = "pane_in_mode" },
+  { capture = "variable", text = "#{@theme2}" },
+  { capture = "variable.builtin", text = "#{@theme2}", must_exist = false },
+  { capture = "variable", text = "theme2" },
+  { capture = "variable.builtin", text = "#{pane_current_command}" },
+  { capture = "function.call", text = "==" },
+  { capture = "variable.builtin", text = "#I" },
+  { capture = "variable.builtin", text = "%H" },
+  { capture = "function.call", text = "b" },
+  { capture = "string", text = "printf hello" },
+  { capture = "punctuation.special", text = "#" },
+  { capture = "operator", text = "?" },
+]

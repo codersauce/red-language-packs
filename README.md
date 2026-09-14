@@ -24,6 +24,7 @@ installation state, and native-grammar approval boundary.
 - `packs/sql` — SQL highlighting and SQL language server integration.
 - `packs/svelte` — Svelte highlighting with embedded scripts and styles.
 - `packs/swift` — Swift highlighting and SourceKit-LSP integration.
+- `packs/tmux` — tmux configuration and embedded format-string highlighting.
 - `packs/vue` — Vue single-file component highlighting and Vue language server integration.
 - `packs/zig` — Zig highlighting, ZLS integration, and `zig fmt` formatting.
 
@@ -50,6 +51,13 @@ is never installed as one aggregate runtime package. Red-owned metadata under
 `arborium/languages/` controls each pack's identity, selectors, comments,
 language-server command, reviewed query overlays, and any justified upstream
 source override.
+
+A grammar absent from the pinned Arborium inventory can use an explicit
+`source.kind = "standalone"` overlay. Standalone sources must pin their own
+repository, commit, archive digest, license, and review reason. They have no
+Arborium quality tier. A pack can include companion grammars when its embedded
+language needs a separate parser; every companion has its own reviewed source
+and native grammar artifact.
 
 Inspect the complete upstream inventory and regenerate the reviewed packs:
 
@@ -87,11 +95,38 @@ Every language server is optional and launched through a command discovered on
 module through `pwsh`. Language servers are never downloaded or bundled with
 grammar packages.
 
+### tmux
+
+The tmux pack contains two grammars: `tmux` for configuration commands and
+`tmuxf` for embedded format strings. It recognizes the exact basenames
+`.tmux.conf`, `tmux.conf`, `.tmux.conf.local`, and `tmux.conf.local`, including
+`~/.config/tmux/tmux.conf`. Other `.conf` files keep their existing detection.
+The pack provides syntax highlighting and `#` comments without a language server
+or formatter.
+
+Build and install both grammars from this checkout:
+
+```shell
+python3 scripts/arborium.py sync tmux
+python3 scripts/build_grammar.py tmux
+python3 scripts/validate_pack.py packs/tmux
+red plugin install --path packs/tmux --trust-native-grammars
+red packs/tmux/example/.tmux.conf
+```
+
+The source lock pins the MIT-licensed `Freed-Wu/tree-sitter-tmux` and
+`Freed-Wu/tree-sitter-tmuxf` repositories independently. Runtime highlighting
+uses reviewed Red queries; the original upstream highlight queries remain in
+the package for provenance. See [the tmux pack](packs/tmux/README.md) for the
+source revisions and supported syntax.
+
 ## Indentation
 
-The packs include Red indentation queries and portable regression fixtures.
+Packs with Red indentation queries include portable regression fixtures.
 See [CONTRIBUTING.md](CONTRIBUTING.md#indentation-rules) for the query workflow
 and end-to-end checks. These pack versions require Red host API 0.12.0.
+The tmux pack has no indentation queries and remains compatible with host API
+0.10.0.
 
 ## Releases
 
